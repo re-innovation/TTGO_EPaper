@@ -89,6 +89,7 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 // Subscribe to a feed called 'airRadiation' for subscribing to changes on the airRadiation Feed
 // This is a public feed that I have set up
 Adafruit_MQTT_Subscribe airRadiation = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/airradiation");
+Adafruit_MQTT_Publish getRadiation = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/airradiation/get");
 
 String dataValue;
 String oldDataValue;
@@ -217,9 +218,9 @@ void setup_wifi() {
     displayText("SSID:", 45, CENTER_ALIGNMENT);
     displayText(AP_SSID, 60, CENTER_ALIGNMENT);
     displayText("PASS:", 75, CENTER_ALIGNMENT);
-    displayText(AP_PASS, 90, CENTER_ALIGNMENT);       
+    displayText(AP_PASS, 90, CENTER_ALIGNMENT);
     display.update();
-    
+
     //it starts an access point
     //and goes into a blocking loop awaiting configuration
     if (!ESP_wifiManager.startConfigPortal(AP_SSID.c_str(), AP_PASS.c_str()))
@@ -268,14 +269,13 @@ void setup() {
 
   // MQTT subscription with adafruit IO is
   mqtt.subscribe(&airRadiation);
-  
-}
 
-void loop()
-{
   MQTT_connect();
 
   Adafruit_MQTT_Subscribe *subscription;
+
+  getRadiation.publish(0);  // This publishes to /get of the radiation feed
+
   while ((subscription = mqtt.readSubscription(5000))) {
     if (subscription == &airRadiation) {
       Serial.print(F("Got: "));
@@ -283,28 +283,38 @@ void loop()
       dataValue = (char *)airRadiation.lastread;
     }
   }
+  // Should always get a data value here... 
+  // But need to handle it if we dont! (not yet implemented)
+  
+  // Got the data now need to display it...
+  display.fillScreen(GxEPD_WHITE);
+  display.setTextSize(1);
+  displayText("Radiation:", 15, CENTER_ALIGNMENT);
+  display.setTextSize(4);
+  // Want to convert the dataValue (a string) into an int
+  // Then re-cast to a string with limited decimal places
+  int dataNumber = dataValue.toInt();
+  displayText(String(dataNumber), 80, CENTER_ALIGNMENT);
+  display.setTextSize(0);
+  display.update();
 
-  if (dataValue != oldDataValue)
-  {
-    display.fillScreen(GxEPD_WHITE);
-    display.setTextSize(1);
-    displayText("Radiation:", 15, CENTER_ALIGNMENT);
-    display.setTextSize(4);
-    // Want to convert the dataValue (a string) into an int
-    // Then re-cast to a string with limited decimal places
-    int dataNumber = dataValue.toInt(); 
-    displayText(String(dataNumber), 80, CENTER_ALIGNMENT);
-    display.setTextSize(0);
-    display.update();
-    oldDataValue = dataValue;
-
-  }
-  delay(1000);
+  /* Now go to sleep:
+  First we configure the wake up source
+  We set our ESP32 to wake up every 5 seconds
+  */
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+  
+  Serial.println("Going to sleep now");
+  Serial.flush(); 
+  esp_deep_sleep_start();
+  Serial.println("This will never be printed"); 
 }
 
-
-
-
+void loop()
+{
+ // Using deep sleep we never enter here! 
+}
 
 // Function to connect and reconnect as necessary to the MQTT server.
 // Should be called in the loop function and it will take care if connecting.
@@ -315,7 +325,7 @@ void MQTT_connect() {
   if (mqtt.connected()) {
     return;
   }
-  
+
   Serial.print("Connecting to MQTT... ");
   uint8_t retries = 3;
   while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
