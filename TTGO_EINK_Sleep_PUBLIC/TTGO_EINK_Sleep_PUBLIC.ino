@@ -211,7 +211,7 @@ void setup_wifi() {
     Serial.print(" on 198.162.4.1");
 
     // Want to display the info here for people to log in:
-    display.fillScreen(GxEPD_WHITE);
+    displayInit();
     display.setTextSize(1);
     displayText("Please connect to:", 15, CENTER_ALIGNMENT);
     displayText("198.168.4.1", 30, CENTER_ALIGNMENT);
@@ -237,7 +237,6 @@ void setup_wifi() {
 
 #ifdef ESP32
   WiFi.mode(WIFI_STA);
-  WiFi.persistent (true);
 
   // We start by connecting to a WiFi network
   Serial.print("Connecting to ");
@@ -250,7 +249,7 @@ void setup_wifi() {
     WiFi.begin(Router_SSID.c_str(), Router_Pass.c_str());
     //Keep trying until we are connected
     Serial.print(".");
-    delay(500);
+    delay(1000);
   }
 #endif
   //if you get here you have connected to the WiFi
@@ -260,9 +259,6 @@ void setup_wifi() {
 
 void setup() {
   Serial.begin(115200);
-
-  // Start up the display
-  displayInit();
 
   // Sort out Wifi
   setup_wifi();
@@ -287,7 +283,7 @@ void setup() {
   // But need to handle it if we dont! (not yet implemented)
   
   // Got the data now need to display it...
-  display.fillScreen(GxEPD_WHITE);
+  displayInit();
   display.setTextSize(1);
   displayText("Radiation:", 15, CENTER_ALIGNMENT);
   display.setTextSize(4);
