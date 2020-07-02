@@ -74,6 +74,7 @@ String AP_PASS;
 
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
+
 // ********* For the ADAFRUIT IO MQTT CONNECTION **********************/
 // WiFiFlientSecure for SSL/TLS support
 //WiFiClientSecure client;
@@ -195,7 +196,33 @@ void setup_wifi() {
   //Remove this line if you do not want to see WiFi password printed
   //Serial.println("Stored: SSID = " + Router_SSID + ", Pass = " + Router_Pass);
 
-  if (Router_SSID == "")
+  bool wifi_ok_flag = true;
+  int n = 0; // Counter for attempts for wifi connection
+
+  // Need to figure out here if the stored SSID works or not. If it doesn't then start an access point...
+  // Try the wifi connection:
+#ifdef ESP32
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(Router_SSID.c_str(), Router_Pass.c_str());
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    WiFi.begin(Router_SSID.c_str(), Router_Pass.c_str());
+    //Keep trying until we are connected
+    Serial.print(".");
+    delay(1000);
+    n++;
+    // If this doesn't connect in 10 seconds then start an access point
+    if (n >= 20)
+    {
+      // failed to conenct, so start AP
+      wifi_ok_flag = false;
+      Serial.println("Start AP as failed to connect");
+      break;
+    }
+  }
+
+  if (wifi_ok_flag == false)
   {
     // If there is no stored SSID then start an access point
     Serial.println("No stored Credentials. Start AP Mode for Entering Details");
@@ -233,26 +260,9 @@ void setup_wifi() {
       Serial.println("connected to WiFi...");
     }
   }
-  // At this point we have the correct SSID and PW configured and start the wifi
-
-#ifdef ESP32
-  WiFi.mode(WIFI_STA);
-
-  // We start by connecting to a WiFi network
-  Serial.print("Connecting to ");
-  Serial.print(Router_SSID);
-
-  WiFi.begin(Router_SSID.c_str(), Router_Pass.c_str());
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    WiFi.begin(Router_SSID.c_str(), Router_Pass.c_str());
-    //Keep trying until we are connected
-    Serial.print(".");
-    delay(1000);
-  }
+  
 #endif
-  //if you get here you have connected to the WiFi
+  //if you get here you should! have connected to the WiFi
   Serial.println("WiFi connected");
 }
 
@@ -279,11 +289,12 @@ void setup() {
       dataValue = (char *)airRadiation.lastread;
     }
   }
-  // Should always get a data value here... 
+  // Should always get a data value here...
   // But need to handle it if we dont! (not yet implemented)
-  
+
   // Got the data now need to display it...
-  displayInit();
+  displayInit();  // This only happens once - might need to erase display if alreayd Init().
+  display.eraseDisplay();
   display.setTextSize(1);
   displayText("Radiation:", 15, CENTER_ALIGNMENT);
   display.setTextSize(4);
@@ -295,21 +306,21 @@ void setup() {
   display.update();
 
   /* Now go to sleep:
-  First we configure the wake up source
-  We set our ESP32 to wake up every 5 seconds
+    First we configure the wake up source
+    We set our ESP32 to wake up every 5 seconds
   */
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
-  
+
   Serial.println("Going to sleep now");
-  Serial.flush(); 
+  Serial.flush();
   esp_deep_sleep_start();
-  Serial.println("This will never be printed"); 
+  Serial.println("This will never be printed");
 }
 
 void loop()
 {
- // Using deep sleep we never enter here! 
+  // Using deep sleep we never enter here!
 }
 
 // Function to connect and reconnect as necessary to the MQTT server.
