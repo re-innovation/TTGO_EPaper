@@ -72,6 +72,24 @@ Change these values and then upload using the Arduino IDE.
 
 ### Adafruit IO example
 
+This example shows how to read a data feed from your own AdafruitIO feeds (https://io.adafruit.com/). You will need to make an account with AdafruitIO (free for up to 5 feeds).
+
+I have already set up a feed from a radiation sensor in my workshop. 
+You will need to change a few thuings to get your feed running.
+
+First you need to include your AdafruitIO username and key into the config file:
+#define AIO_SERVER          "io.adafruit.com"       // direct
+#define AIO_SERVERPORT      1883                    // 8883  // Use 8883 if at all possible!
+#define AIO_USERNAME        "YOUR USER NAME"        // This is your Adafruit IO username
+#define AIO_KEY             "YOUR KEY"              // This is your Adafruit IO Key
+
+You then need to set up two feed. One is to subscribe to the feed and the other is publish to feed. As MQTT does not automatically give back a result unless it changes, AdafruitIO has a special case that when we wake up we need to publish (0) to the feed. This will send a message back to any feeds subscribed to the channel, which will give us the latest value. Thats why we need to subscribe and publish with a get here. In these lines change "airradiation" to the name of your feed channel.
+
+Adafruit_MQTT_Subscribe airRadiation = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/airradiation");
+Adafruit_MQTT_Publish   getRadiation = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/airradiation/get");
+
+In the example code this returns a counts per minute value from the radiation sensor. This is displayed, along with the coverted micro-Sv value (which is just multiplied by 0.0057).
+This value also is used to choose the icon to display. I have set three different icons: Low, Medium and High. These were drawn in inkscape and then converted to a 1-bit jpg and then converted to the data file required. Please see my blog post about how I did this, if you are interested (https://www.re-innovation.co.uk/blog/2020/ttgo-e-paper-display/).
 
 
 ### Quotation Unit example
