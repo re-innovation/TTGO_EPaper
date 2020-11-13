@@ -35,7 +35,14 @@ These can be installed via Arduino IDE Library Manager.
 When you have installed the library, for the ESP_WiFiManager library you also need to:
 * Got to the folder where the library has been installed (your sketchbook -> libraries).
 * Copy the files from src_cpp and paste them into src.
+
 This is because these examples use the older c++ (cpp) files.
+
+To get the E-Paper display working I also needed to ensure I had the correct driver src installed. This is called "GxGDE0213B72B".
+When you have installed the library, for the GxEPD library you also need to:
+* Got to the folder where the library has been installed (your sketchbook -> libraries).
+* Copy the "GxGDE0213B72B" folder from this repository to GxEPD -> src  and paste there.
+
 
 ### Open Weather Map example
 
