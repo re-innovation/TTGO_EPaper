@@ -1,5 +1,3 @@
-#pragma once
-
 #define TTGO_T5_1_2 0
 #define TTGO_T5_2_0 0
 #define TTGO_T5_2_1 0
@@ -14,7 +12,6 @@
 //#include <GxGDEW0154Z17/GxGDEW0154Z17.h>  // 1.54" b/w/r 152x152
 // #include <GxGDEW027W3/GxGDEW027W3.h> // 2.7" b/w
 #include <GxGDEH029A1/GxGDEH029A1.h>     // 2.9" b/w
-
 //#include <GxGDEW029Z10/GxGDEW029Z10.h>    // 2.9" b/w/r
 //#include <GxGDE0213B1/GxGDE0213B1.h>      // 2.13" b/w
 // #include <GxGDEW0213Z16/GxGDEW0213Z16.h>  // 2.13" b/w/r
@@ -74,12 +71,10 @@
 #define SPEAKER_OUT 25
 
 #elif (TTGO_T5_2_0) || (TTGO_T5_2_3)
-
-//#include <GxGDE0213B1/GxGDE0213B1.h>        // 2.13" b/w
-//#include <GxGDE0213B72/GxGDE0213B72.h>      // 2.13" b/w     GxGDE0213B1 升级版本
-#include <GxGDE0213B72B/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
-//#include <GxGDE0213B72B/GxGDE0213B72B.h>    // 2.13" b/w
-//#include <GxGDEH0213B72/GxGDEH0213B72.h>     // 2.13" b/w new panel
+// #include <GxGDE0213B1/GxGDE0213B1.h>      // 2.13" b/w
+// #include <GxGDE0213B72/GxGDE0213B72.h>      // 2.13" b/w     GxGDE0213B1 升级版本
+//#include <GxGDE0213B72B/GxGDE0213B72B.h> // 2.13" b/w           GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
+#include <GxGDE0213B72B/GxGDE0213B72B.h> // 2.13" b/w
 
 #define SPI_MOSI 23
 #define SPI_MISO -1
