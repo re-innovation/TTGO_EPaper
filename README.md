@@ -34,7 +34,8 @@ These can be installed via Arduino IDE Library Manager.
 
 When you have installed the library, for the ESP_WiFiManager library you also need to:
 * Got to the folder where the library has been installed (your sketchbook -> libraries).
-* Copy the files from src_cpp and paste them into src.
+* Copy the files from the folder called "src_cpp"
+* Paste them into the folder called "src".
 
 This is because these examples use the older c++ (cpp) files.
 
@@ -91,6 +92,7 @@ Adafruit_MQTT_Publish   getRadiation = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME
 In the example code this returns a counts per minute value from the radiation sensor. This is displayed, along with the coverted micro-Sv value (which is just multiplied by 0.0057).
 This value also is used to choose the icon to display. I have set three different icons: Low, Medium and High. These were drawn in inkscape and then converted to a 1-bit jpg and then converted to the data file required. Please see my blog post about how I did this, if you are interested (https://www.re-innovation.co.uk/blog/2020/ttgo-e-paper-display/).
 
+This example code can either be set to wake with a touch press or on a timer. I'm using a timer to check every 2 hours... 
 
 ### Quotation Unit example
 
