@@ -14,16 +14,13 @@
 // This code wakes up, checks if WiFi credentials are stored
 // If not an Acess point is started to enter in the details - these are stored
 // If they are stored then the unit does the following (in this example):
-// 1 - checks an MQTT channel through Adafruit IO
-// 2 - checks the weather from Open Weather API
-// 3 - checks the bus timetable data (UK) from the UK Bus Times API - NOT implemented yet...
+// - downloads a random quote and displays the text and author.
 //
 // If using Arduino IDE: Must use "ESP32 Dev Module"
 //
 // You MUST include the following libraries:
 //    GxEPD by Jean-Marc Zingg        - I needed to make sure I had the correct EPaper driver.
 //    ESP_Wifi_Manager by Khoi Howang - I had to use the older type with cpp and h files. See github for details.
-//    Adafruit_MQTT by Adafruit       - Only needed if you want to get data from Adafruit IO.
 //
 
 #if !( defined(ESP8266) ||  defined(ESP32) )
@@ -45,11 +42,11 @@
 #define  ESP_getChipId()   (ESP.getChipId())
 #endif
 
-// This is for dealing with the JSON returned data.
-#include <ArduinoJson.h>     // https://github.com/bblanchon/ArduinoJson
-#include <TimeLib.h>  // Include time functions
-#include "Config.h"
+//// This is for dealing with the JSON returned data.
+//#include <ArduinoJson.h>     // https://github.com/bblanchon/ArduinoJson
+//#include <TimeLib.h>  // Include time functions
 
+#include "Config.h"
 #include "CE_Icons.h"        // Curious Electric Icons
 #include "display.h"
 #include "board_def.h"
@@ -57,33 +54,14 @@
 #include "epaper_fonts.h"
 #include "time.h"            // Built-in
 #include "utilities.h"
-#include "weather.h"
-#include "mqtt.h"
+#include "quote.h"
 
-// ********* For the ADAFRUIT IO MQTT CONNECTION **********************/
-// WiFiFlientSecure for SSL/TLS support
-//WiFiClientSecure client;
-WiFiClient client;
-// Setup the MQTT client class by passing in the WiFi client and MQTT server and login details.
-Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
-// io.adafruit.com SHA1 fingerprint
-//static const char *fingerprint PROGMEM = "77 00 54 2D DA E7 D8 03 27 31 23 99 EB 27 DB CB A5 4C 57 18";
-/************* Feeds for Adafruit IO *********************************/
-// Subscribe to a feed called 'airRadiation' for subscribing to changes on the airRadiation Feed
-// This is a public feed that I have set up
-Adafruit_MQTT_Subscribe airRadiation = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/airradiation");
-Adafruit_MQTT_Publish   getRadiation = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/airradiation/get");
-
-String dataValue;
-String oldDataValue;
-int radiationValue;
-
-// Variables for the weather calls
-boolean RxWeather = false, RxForecast = false;    // Initialise these - have we got the data?
-String  TimeStr, DateStr, ErrorMessage;           // strings to hold time and date
-
-Forecast_record_type  WxConditions[1];
-Forecast_record_type  WxForecast[MAX_WEATHER_READINGS];
+// Global variables
+String payload; // Holds the reply from the HTTP request
+String quote; // Holds the final quote
+String author;  // Holds the author of the quote
+//String textDisplay; // Holds the data to show on the OLED screen
+//bool quoteLong = false; // This is a flag. If set then the quote is shown in two parts
 
 void callback() {
   // Happens if the unit is already awake!
@@ -98,61 +76,82 @@ void setup() {
   Serial.begin(115200);
 
   // Want to display that we are getting an update
-  // ***** TO DO ****
-  // Show "Getting info for: Country, City"
   displayInit();          // Initialise the display.
-
   displayShowCELogo();
   displayUpdatingScreen();
   displayUpdate();        // actually show the display...
-  
+
   // Start Wifi - Connect if we have the SSID/PASS or set up AP if not.
   setup_wifi();
 
-  // Get radiation data from Adafruit IO via MQTT call
-  // This is an example to show how to get info from Adafruit.IO
-  radiationValue = getRadiationMQTT(mqtt, airRadiation, getRadiation);
-  
-  // Here we get the weather data from Open Weather Maps
-  // Need to register account with them and get API key - put that into the Config.h file
+  // Here we create the URL to check for getting the quote information
+  // Sample URL is: http://api.forismatic.com/api/1.0/?method=getQuote&key=457653&format=text&lang=en
+  String url = QUOTE_SERVER;
+  // Create the full URL with method, format and language
+  url += "?method=getQuote&key=";
+  url += QUOTE_SEED;
+  url += "&format=text&lang=";
+  url += QUOTE_LANGUAGE;
+  Serial.println(url);
+
   if ((WiFi.status() == WL_CONNECTED))
   {
-    // Here want to get the weather data:
-    byte Attempts = 1;
-    WiFiClient client1; // wifi client object
-    while ((RxWeather == false || RxForecast == false) && Attempts <= MAX_ATTEMPTS)
-    { // Try up to MAX_ATTEMPTS for Weather and Forecast data
-      if (RxWeather  == false) RxWeather  = obtain_wx_data(client1, "weather", WxConditions, WxForecast);
-      if (RxForecast == false) RxForecast = obtain_wx_data(client1, "forecast", WxConditions, WxForecast);
-      Attempts++;
-    }
-
-    // Refresh screen if data was received OK, otherwise wait until the next timed check
-    if (RxWeather || RxForecast)
+    HTTPClient http;
+    bool quote_length_flag = false;
+    http.begin(url);
+    while (quote_length_flag == false)
     {
-      stopWiFi(); // Reduces power consumption
-      
-      // ****** Display all the data here: *************************
-      displayClear();
-      displayRadiationInfo(radiationValue);   // Does not display yet - needs display update
-      // Here we need to deal with data which is JSON format & also display it.
-      displayWeatherInfo(WxConditions, WxForecast);
-      displayUpdate();  // actually show the display...
+      int httpCode = http.GET();
+      // httpCode will be negative on error
+      if (httpCode > 0) {
+        // HTTP header has been send and Server response header has been handled
+        Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+        // file found at server
+        if (httpCode == HTTP_CODE_OK) {
+          payload = http.getString();
+          Serial.println(payload);
+          if (payload.length() < 132)
+          {
+            quote_length_flag = true; // Quote is short so all OK
+          }
+        }
+      } else {
+        delay(500);
+        // String too long or failed to get it
+        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      }
     }
-    else
-    {
-      stopWiFi(); // Reduces power consumption
-      Serial.println("Failed to get Wx Data, " + String(RxWeather ? "" : " Failed RxWeather") + String(RxForecast ? "" : " Failed RxForecast"));
-    }
+    http.end();
   }
+
+  stopWiFi(); // Reduces power consumption
+
+  String quote = parseQuote(payload);
+  Serial.println(quote);
+  String author = parseAuthor(payload);
+  Serial.println(author);
+
+  // ****** Display quote here: *************************
+  displayClear();
+  displayQuote(quote, author);
+  displayUpdate();  // actually show the display...
+
   digitalWrite(LED_GPIO, LOW);    // Switch off LED - got data
   // Now go to sleep: zzzzzz....
+
+  // ################ SLEEP TYPE #####################################
+  //    // **** TIMER WAKE UP ******************************************
+  //    esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  //    Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+
+  // **** TOUCH PAD WAKE UP ******************************************
   // Setup interrupt on Touch Pad 9 (GPIO32)
   // This is called T8 NOT T9 due to an error in Arduino ID:
   touchAttachInterrupt(WAKE_UP_PIN, callback, THRESHOLD);
   // touchAttachInterrupt(T8, callback, THRESHOLD);
   esp_sleep_enable_touchpad_wakeup();
   Serial.println("ESP will wake up on touch - pin GPIO32");
+  //################################################################
   Serial.println("Going to sleep now");
   Serial.flush();
   esp_deep_sleep_start();

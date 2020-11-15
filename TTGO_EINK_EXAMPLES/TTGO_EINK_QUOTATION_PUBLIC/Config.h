@@ -7,43 +7,14 @@
 #include <Millis.h>
 #include <EEPROM.h>        // For writing values to the EEPROM
 
-//Adafruit IO info
-// This needs an account created.
-//https://io.adafruit.com/api/docs/mqtt.html#mqtt-connection-details
-#define AIO_SERVER          "io.adafruit.com"                   // direct
-#define AIO_SERVERPORT      1883                                // 8883  // Use 8883 if at all possible!
-#define AIO_USERNAME        "YOUR ADAFRUIT IO USER"                            // This is your Adafruit IO username
-#define AIO_KEY             "YOUR ADAFRUIT IO KEY"  // This is your Adafruit IO Key
+// The information for the quotation connection:
+// From: https://forismatic.com/en/api/
+// Sample URL is: http://api.forismatic.com/api/1.0/?method=getQuote&key=457653&format=text&lang=en
 
-// Use your own API key by signing up for a free developer account at https://openweathermap.org/
-// This needs an account created.
-#define   OWM_KEY       "YOUR OPEN WEATHER MAP KEY"             // See: https://openweathermap.org/
-#define   OWM_SERVER    "api.openweathermap.org"
+#define   QUOTE_SERVER    "http://api.forismatic.com/api/1.0/"    // This supplies the random quote
+#define   QUOTE_SEED      ""                                      // This is a seed (6 digit) to help specify the quote - leave blank for totally random
+#define   QUOTE_LANGUAGE  "en"                                    // The language for the unit - at present "en" or "ru". russian does not display at the moment...
 
-//Set your location according to Open Weather Map locations
-//Example:
-#define   MY_CITY        "Nottingham"                   // Your home city See: http://bulk.openweathermap.org/sample/
-#define   MY_COUNTRY     "GB"                           // Your country
-#define   MY_LANGUAGE    "EN"                            // NOTE: Only the weather description (not used) is translated by OWM
-// Arabic (AR) Czech (CZ) English (EN) Greek (EL) Persian(Farsi) (FA) Galician (GL) Hungarian (HU) Japanese (JA)
-// Korean (KR) Latvian (LA) Lithuanian (LT) Macedonian (MK) Slovak (SK) Slovenian (SL) Vietnamese (VI)
-#define   MY_HEMISPHERE  "north"                         // or "south"
-#define   MY_UNITS       "M"                             // Use "M" for Metric or I for Imperial
-#define   MY_TIMEZONE    "GMT0BST,M3.5.0/01,M10.5.0/02"  // Choose your time zone from: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
-
-// Example time zones
-//#define   MY_TIMEZONE = "MET-1METDST,M3.5.0/01,M10.5.0/02"; // Most of Europe
-//#define   MY_TIMEZONE = "CET-1CEST,M3.5.0,M10.5.0/3";       // Central Europe
-//#define   MY_TIMEZONE = "EST-1METDST,M3.5.0/01,M10.5.0/02"; // Most of Europe
-//#define   MY_TIMEZONE = "EST5EDT,M3.2.0,M11.1.0";           // EST USA
-//#define   MY_TIMEZONE = "CST6CDT,M3.2.0,M11.1.0";           // CST USA
-//#define   MY_TIMEZONE = "MST7MDT,M4.1.0,M10.5.0";           // MST USA
-//#define   MY_TIMEZONE = "NZST-12NZDT,M9.5.0,M4.1.0/3";      // Auckland
-//#define   MY_TIMEZONE = "EET-2EEST,M3.5.5/0,M10.5.5/0";     // Asia
-//#define   MY_TIMEZONE = "ACST-9:30ACDT,M10.1.0,M4.1.0/3":   // Australia
-
-#define   MAX_ATTEMPTS          2
-#define   MAX_WEATHER_READINGS  5
 #define   LED_GPIO              19
 
 // If we are using SLEEP mode:
@@ -54,35 +25,3 @@
 //Setup interrupt on Touch Pad 9 (GPIO32)
 #define   WAKE_UP_PIN       T8        // This is called T8 NOT T9 due to an error in Arduino IDE
 #define   THRESHOLD         40        /* Greater the value, more the sensitivity */
-
-typedef struct {
-  // For current Day and Day 1, 2, 3, etc
-  float    lat;
-  float    lon;
-  String   Dt;
-  String   Period;
-  float    Temperature;
-  float    Humidity;
-  String   Icon;
-  float    High;
-  float    Low;
-  float    Rainfall;
-  float    Snowfall;
-  float    Pressure;
-  int      Cloudcover;
-  int      Visibility;
-  String   Trend;
-  float    Winddir;
-  float    Windspeed;
-  String   Main0;
-  String   Forecast0;
-  String   Forecast1;
-  String   Forecast2;
-  String   Description;
-  String   Time;
-  int      Sunrise;
-  int      Sunset;
-  String   Country;
-  int      TimeUTC;
-  int      TimeZone;
-} Forecast_record_type;

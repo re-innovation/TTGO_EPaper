@@ -26,6 +26,45 @@ void displayShowCELogo()
   // This routine shows the Curious Electric Logo on the screen. Always Useful!!
   display.drawExampleBitmap(gImage_CE_Logo_test_data_100x120, 140, 0, 100, 120, GxEPD_BLACK);
 }
+
+
+//#########################################################################
+void displayQuote(String _quote, String _author)
+{
+  // Need to check the size of the quote
+  // If it is bigger than *** then need to chop into smaller strings and display parts
+  // Display is 250px x 122px
+
+  // This displays the quote on the e-ink display
+  display.setTextSize(1);
+  int _index = 0;
+  String _local_string = _quote.substring(_index, _index + 22);
+  int n = 10; // First line placement
+  //while (_local_string.length() > 0)
+  for (int y = 0; y < 6; y++)
+  {
+    // Max 6 lines of text available...
+    // Find the final space in the string:
+    _local_string = _quote.substring(0, 22);
+    _index = 22;
+    while (!isSpace(_local_string[_index]))
+    {
+      _index--;
+    }
+    displayText(_quote.substring(0, _index), n, CENTER_ALIGNMENT);
+    n = n + 17; // Go to a new line
+    int end_of_quote = _quote.length();
+    _quote = _quote.substring(_index, end_of_quote);
+    if (_quote.length() < 22)
+    {
+      displayText(_quote, n, CENTER_ALIGNMENT);
+      break;
+    }
+  }
+  displayText(_author, 116, CENTER_ALIGNMENT);
+}
+
+
 //#########################################################################
 void displayInit()
 {
@@ -54,22 +93,13 @@ void displayClear()
   //display.update();
 }
 
-void displayRadiationInfo(int _dataNumber)
-{
-  display.setCursor(0, 11);
-  display.println("CPM:");
-  display.setCursor(50, 11);
-  display.println(_dataNumber);
-}
 
 void displayUpdatingScreen()
 {
   display.setCursor(0, 11);
-  display.println("Finding...");
+  display.println("Finding");
   display.setCursor(0, 31);
-  display.println(MY_CITY);
-  display.setCursor(0, 51);
-  display.println(MY_COUNTRY);
+  display.println("Quote...");
 }
 
 void displayUpdate()
@@ -77,56 +107,6 @@ void displayUpdate()
   display.update();
 }
 
-//#########################################################################################
-void displayWeatherInfo(Forecast_record_type _WxConditions[], Forecast_record_type _WxForecast[])
-{
-  // 2.13" e-paper display is 250 x 122 px resolution
-
-  // Here want to display the time and date of most recent update:
-  display.setCursor(0, 27);
-  String displayDateTime = digitalClockDisplay(_WxConditions[0].TimeUTC + _WxConditions[0].TimeZone);
-  display.println(displayDateTime);
-  display.setCursor(0, 45);
-  display.println(_WxConditions[0].Forecast0);
-  display.setCursor(150, 11);
-  display.println("Now:");
-  // This shows the forecast for the day:
-  displayCEIcon(200, 0, _WxConditions[0].Icon);          // Weather person depiction of weather
-
-  // This shows the 3 hr forecast for next 5 lots of 3 hours
-  displayCEIcon(0,   72, _WxForecast[0].Icon);          // Weather person depiction of weather
-  display.setCursor(5, 70);
-  String displayTime = addTimeZone(findHours(_WxForecast[0].Period), _WxConditions[0].TimeZone);
-  display.println(displayTime);
-  displayCEIcon(50,  72, _WxForecast[1].Icon);          // Weather person depiction of weather
-  display.setCursor(55, 68);
-  displayTime = addTimeZone(findHours(_WxForecast[1].Period), _WxConditions[0].TimeZone);
-  display.println(displayTime);
-
-  displayCEIcon(100, 72, _WxForecast[2].Icon);          // Weather person depiction of weather
-  display.setCursor(105, 68);
-  displayTime = addTimeZone(findHours(_WxForecast[2].Period), _WxConditions[0].TimeZone);
-  display.println(displayTime);
-
-  displayCEIcon(150, 72, _WxForecast[3].Icon);          // Weather person depiction of weather
-  display.setCursor(155, 68);
-  displayTime = addTimeZone(findHours(_WxForecast[3].Period), _WxConditions[0].TimeZone);
-  display.println(displayTime);
-
-  displayCEIcon(200, 72, _WxForecast[4].Icon);          // Weather person depiction of weather
-  display.setCursor(205, 68);
-  displayTime = addTimeZone(findHours(_WxForecast[4].Period), _WxConditions[0].TimeZone);
-  display.println(displayTime);
-
-  //  DisplayWxIcon(276, 15, WxConditions[0].Icon, LargeIcon); // Weather icon
-  //  DisplayMainWeatherSection(0, 148);                       // Weather forecast text
-  //  DisplayForecastSection(131, 172);                        // 3hr interval forecast boxes
-  //  DisplayAstronomySection(131, 174);                       // Astronomy section Sun rise/set, Moon phase and Moon icon
-  //  DisplayWindSection(50, 220, WxConditions[0].Winddir, WxConditions[0].Windspeed, 50); // Wind direction info
-  //  DisplaySystemStatus(293, 238);
-
-  //display.update();
-}
 
 //#################################################################################
 void displayText(const String &_str, int16_t _y, uint8_t _alignment)
