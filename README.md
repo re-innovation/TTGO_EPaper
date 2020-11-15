@@ -99,7 +99,7 @@ This example code can either be set to wake with a touch press or on a timer. I'
 
 ### Quotation Unit example
 
-This example does not need any user info. Just upload this code. Then switch on your e-ink display and connect to the WiFi access points, as per the on-screen instructions.
+This example does not need any user info. Just upload this example code. Then switch on your e-ink display and connect to the WiFi access point, as per the on-screen instructions.
 When you enter your wifi password and SSID then it will restart and download a random quote. A new quote will appear each time the touch pad is pressed.
 
 This code uses the following website, https://forismatic.com/en/, which returns a quote and the author as a line of text.
