@@ -54,12 +54,13 @@ Details for connection are here:https://openweathermap.org/api/one-call-api
 You need to register and get an API key. With their free level you are limited to a certain number of API calls (1,000,00 a month or 60 per minute!), but for this application the free level is fine.
 
 Within the Config.h file you need to include:
-
+'''
 #define   OWM_KEY       "YOUR OPEN WEATHER MAP KEY"                  // See: https://openweathermap.org/
 #define   OWM_SERVER    "api.openweathermap.org"
+'''
 
 And also set your location according to Open Weather Map locations
-
+'''
 #define   MY_CITY        "Nottingham"                   // Your home city See: http://bulk.openweathermap.org/sample/
 #define   MY_COUNTRY     "GB"                           // Your country
 #define   MY_LANGUAGE    "EN"                            // NOTE: Only the weather description (not used) is translated by OWM
@@ -68,6 +69,7 @@ And also set your location according to Open Weather Map locations
 #define   MY_HEMISPHERE  "north"                         // or "south"
 #define   MY_UNITS       "M"                             // Use "M" for Metric or I for Imperial
 #define   MY_TIMEZONE    "GMT0BST,M3.5.0/01,M10.5.0/02"  // Choose your time zone from: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
+'''
 
 Change these values and then upload using the Arduino IDE.
 
