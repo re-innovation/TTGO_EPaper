@@ -54,13 +54,13 @@ Details for connection are here:https://openweathermap.org/api/one-call-api
 You need to register and get an API key. With their free level you are limited to a certain number of API calls (1,000,00 a month or 60 per minute!), but for this application the free level is fine.
 
 Within the Config.h file you need to include:
-'''
+```
 #define   OWM_KEY       "YOUR OPEN WEATHER MAP KEY"                  // See: https://openweathermap.org/
 #define   OWM_SERVER    "api.openweathermap.org"
-'''
+```
 
 And also set your location according to Open Weather Map locations
-'''
+```
 #define   MY_CITY        "Nottingham"                   // Your home city See: http://bulk.openweathermap.org/sample/
 #define   MY_COUNTRY     "GB"                           // Your country
 #define   MY_LANGUAGE    "EN"                            // NOTE: Only the weather description (not used) is translated by OWM
@@ -69,7 +69,7 @@ And also set your location according to Open Weather Map locations
 #define   MY_HEMISPHERE  "north"                         // or "south"
 #define   MY_UNITS       "M"                             // Use "M" for Metric or I for Imperial
 #define   MY_TIMEZONE    "GMT0BST,M3.5.0/01,M10.5.0/02"  // Choose your time zone from: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
-'''
+```
 
 Change these values and then upload using the Arduino IDE.
 
@@ -81,16 +81,17 @@ I have already set up a feed from a radiation sensor in my workshop.
 You will need to change a few thuings to get your feed running.
 
 First you need to include your AdafruitIO username and key into the config file:
+```
 #define AIO_SERVER          "io.adafruit.com"       // direct
 #define AIO_SERVERPORT      1883                    // 8883  // Use 8883 if at all possible!
 #define AIO_USERNAME        "YOUR USER NAME"        // This is your Adafruit IO username
 #define AIO_KEY             "YOUR KEY"              // This is your Adafruit IO Key
-
+```
 You then need to set up two feed. One is to subscribe to the feed and the other is publish to feed. As MQTT does not automatically give back a result unless it changes, AdafruitIO has a special case that when we wake up we need to publish (0) to the feed. This will send a message back to any feeds subscribed to the channel, which will give us the latest value. Thats why we need to subscribe and publish with a get here. In these lines change "airradiation" to the name of your feed channel.
-
+```
 Adafruit_MQTT_Subscribe airRadiation = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/airradiation");
 Adafruit_MQTT_Publish   getRadiation = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/airradiation/get");
-
+```
 In the example code this returns a counts per minute value from the radiation sensor. This is displayed, along with the coverted micro-Sv value (which is just multiplied by 0.0057).
 This value also is used to choose the icon to display. I have set three different icons: Low, Medium and High. These were drawn in inkscape and then converted to a 1-bit jpg and then converted to the data file required. Please see my blog post about how I did this, if you are interested (https://www.re-innovation.co.uk/blog/2020/ttgo-e-paper-display/).
 
