@@ -99,12 +99,12 @@ This example code can either be set to wake with a touch press or on a timer. I'
 
 ### Quotation Unit example
 
-I found the following website, https://forismatic.com/en/, which returns a quote and the author as a line of text.
+This example does not need any user info. Just upload this code. Then switch on your e-ink display and connect to the WiFi access points, as per the on-screen instructions.
+When you enter your wifi password and SSID then it will restart and download a random quote. A new quote will appear each time the touch pad is pressed.
 
-I set about figuring out the http request to send and return a quote in a variety of formats (text, json, xml). This was helped through the use of their API help pages.
+This code uses the following website, https://forismatic.com/en/, which returns a quote and the author as a line of text.
 
-The final URL I used to send via an http request is: http://api.forismatic.com/api/1.0/?method=getQuote&key=&format=text&lang=en
-
+The final URL used to send via an http GET request is: http://api.forismatic.com/api/1.0/?method=getQuote&key=&format=text&lang=en
 
 ## More information
 
