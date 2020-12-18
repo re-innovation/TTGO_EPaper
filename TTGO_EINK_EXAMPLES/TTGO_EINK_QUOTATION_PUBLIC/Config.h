@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <Millis.h>
 #include <EEPROM.h>        // For writing values to the EEPROM
 
 // The information for the quotation connection:
@@ -24,4 +23,4 @@
 // If we are using TOUCH WAKE UP mode:
 //Setup interrupt on Touch Pad 9 (GPIO32)
 #define   WAKE_UP_PIN       T8        // This is called T8 NOT T9 due to an error in Arduino IDE
-#define   THRESHOLD         40        /* Greater the value, more the sensitivity */
+#define   THRESHOLD         50        /* Greater the value, more the sensitivity */
