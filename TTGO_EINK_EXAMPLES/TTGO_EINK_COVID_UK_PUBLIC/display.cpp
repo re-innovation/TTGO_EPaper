@@ -36,7 +36,7 @@ void displayInit()
   isInit = true;    // This only lets the init run once...
   display.init();
   display.setRotation(1);
-  //display.eraseDisplay();
+  display.eraseDisplay();
   display.setTextColor(GxEPD_BLACK);
   //  display.setFont(&DEFALUT_FONT);
   //  display.setTextSize(0);
@@ -68,8 +68,8 @@ void displayUpdatingScreen()
   display.println("Finding...");
   display.setCursor(0, 31);
   display.println(MY_CITY);
-//  display.setCursor(0, 51);
-//  display.println(MY_COUNTRY);
+  //  display.setCursor(0, 51);
+  //  display.println(MY_COUNTRY);
 }
 
 void displayUpdate()
@@ -81,52 +81,46 @@ void displayUpdate()
 
 void displayCOVIDInfo(COVID_record_type covid_data[])
 {
-//  // 2.13" e-paper display is 250 x 122 px resolution
-//
-//  // Here want to display the time and date of most recent update:
-//  display.setCursor(0, 27);
-//  String displayDateTime = digitalClockDisplay(_WxConditions[0].TimeUTC + _WxConditions[0].TimeZone);
-//  display.println(displayDateTime);
-//  display.setCursor(0, 45);
-//  display.println(_WxConditions[0].Forecast0);
-//  display.setCursor(150, 11);
-//  display.println("Now:");
-//  // This shows the forecast for the day:
-//  displayCEIcon(200, 0, _WxConditions[0].Icon);          // Weather person depiction of weather
-//
-//  // This shows the 3 hr forecast for next 5 lots of 3 hours
-//  displayCEIcon(0,   72, _WxForecast[0].Icon);          // Weather person depiction of weather
-//  display.setCursor(5, 70);
-//  String displayTime = addTimeZone(findHours(_WxForecast[0].Period), _WxConditions[0].TimeZone);
-//  display.println(displayTime);
-//  displayCEIcon(50,  72, _WxForecast[1].Icon);          // Weather person depiction of weather
-//  display.setCursor(55, 68);
-//  displayTime = addTimeZone(findHours(_WxForecast[1].Period), _WxConditions[0].TimeZone);
-//  display.println(displayTime);
-//
-//  displayCEIcon(100, 72, _WxForecast[2].Icon);          // Weather person depiction of weather
-//  display.setCursor(105, 68);
-//  displayTime = addTimeZone(findHours(_WxForecast[2].Period), _WxConditions[0].TimeZone);
-//  display.println(displayTime);
-//
-//  displayCEIcon(150, 72, _WxForecast[3].Icon);          // Weather person depiction of weather
-//  display.setCursor(155, 68);
-//  displayTime = addTimeZone(findHours(_WxForecast[3].Period), _WxConditions[0].TimeZone);
-//  display.println(displayTime);
-//
-//  displayCEIcon(200, 72, _WxForecast[4].Icon);          // Weather person depiction of weather
-//  display.setCursor(205, 68);
-//  displayTime = addTimeZone(findHours(_WxForecast[4].Period), _WxConditions[0].TimeZone);
-//  display.println(displayTime);
-//
-//  //  DisplayWxIcon(276, 15, WxConditions[0].Icon, LargeIcon); // Weather icon
-//  //  DisplayMainWeatherSection(0, 148);                       // Weather forecast text
-//  //  DisplayForecastSection(131, 172);                        // 3hr interval forecast boxes
-//  //  DisplayAstronomySection(131, 174);                       // Astronomy section Sun rise/set, Moon phase and Moon icon
-//  //  DisplayWindSection(50, 220, WxConditions[0].Winddir, WxConditions[0].Windspeed, 50); // Wind direction info
-//  //  DisplaySystemStatus(293, 238);
-//
-//  //display.update();
+  // 2.13" e-paper display is 250 x 122 px resolution
+
+  // Display: 
+  // Location: 
+  // New Cases, Cumulative case
+  // New Deaths, Cumulative Deaths
+  // Graphic for change
+  // Percentage change from previous day/7 day average?
+
+  // Here want to display the time and date of most recent update:
+  display.setTextSize(0);
+  display.setCursor(0, 21);
+  display.println("Cases:");
+  display.setCursor(0, 51);
+  display.println("Total:");
+  display.setCursor(0, 81);
+  display.println("Deaths:");
+  display.setCursor(0, 111);
+  display.println("Total:");
+
+  display.setTextSize(2);
+  display.setFont(&FreeMonoBold9pt7b);
+  display.setCursor(80, 21);
+  display.println(covid_data[0].newCasesBySpecimenDate);
+  display.setCursor(80, 81);
+  display.println(covid_data[0].newDeathsByDeathDate);
+
+  display.setTextSize(0);  
+  display.setCursor(80, 51);
+  display.println(covid_data[0].cumCasesBySpecimenDate);
+  display.setCursor(80, 111);
+  display.println(covid_data[0].cumDeathsByDeathDate);
+
+  display.setTextSize(0);
+  display.setCursor(180, 21);
+  display.println("Daily");
+  display.setCursor(180, 81);
+  display.println("Daily");
+  
+  //display.update();
 }
 
 //#################################################################################

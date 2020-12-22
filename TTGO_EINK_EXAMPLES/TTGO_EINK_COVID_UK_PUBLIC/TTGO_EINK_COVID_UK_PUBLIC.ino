@@ -1,9 +1,9 @@
 //  ***************** E-Paper Display Unit ***************************
-//  ***************** Example Code - Weather Unit ********************
+//  ***************** Example Code - COVID Data UK Unit **************
 //
 //  This code was:
 //  Written by: Matt Little
-//  Date: 11/11/2020
+//  Date: 21/12/2020
 //  But is based on lots of other peoples examples!
 //  This code is open and can be shared freely.
 //  Contact:  hello@curiouselectric.co.uk
@@ -16,11 +16,12 @@
 // If they are stored then the unit does the following (in this example):
 //  - checks the local COVID cases data
 //
-// If using Arduino IDE: Must use "ESP32 Dev Module"
+// If using Arduino IDE: Must use "DOIT ESP32 DEVKIT V1"
 //
 // You MUST include the following libraries:
 //    GxEPD by Jean-Marc Zingg        - I needed to make sure I had the correct EPaper driver.
 //    ESP_Wifi_Manager by Khoi Howang - I had to use the older type with cpp and h files. See github for details.
+//    ESP32-targz.h by *****          - For opening the gzip data returned.
 //
 
 #if !( defined(ESP8266) ||  defined(ESP32) )
@@ -35,6 +36,7 @@
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #define  ESP_getChipId()   ((uint32_t)ESP.getEfuseMac())
+
 #else
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 #include <DNSServer.h>
@@ -45,8 +47,8 @@
 // This is for dealing with the JSON returned data.
 #include <ArduinoJson.h>     // https://github.com/bblanchon/ArduinoJson
 #include <TimeLib.h>  // Include time functions
-#include "Config.h"
 
+#include "Config.h"
 #include "CE_Icons.h"        // Curious Electric Icons
 #include "display.h"
 #include "board_def.h"
@@ -61,6 +63,12 @@ boolean RxCOVID = false;                    // Initialise these - have we got th
 String  TimeStr, DateStr, ErrorMessage;     // strings to hold time and date
 
 COVID_record_type  covid_data[1];
+
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = -86400;   
+// We want to get yesturdays data, as todays not availabl yet?
+// Subtract 1 days worth of seconds
+const int   daylightOffset_sec = 3600;
 
 void callback() {
   // Happens if the unit is already awake!
@@ -77,28 +85,38 @@ void setup() {
   // Display we are getting an update
   // Show "Getting info for: Country, City"
   displayInit();          // Initialise the display.
-
   displayShowCELogo();
   displayUpdatingScreen();
   displayUpdate();        // actually show the display...
-  
+
   // Start Wifi - Connect if we have the SSID/PASS or set up AP if not.
   setup_wifi();
-  
+
   // Here we get the weather data from Open Weather Maps
   // Need to register account with them and get API key - put that into the Config.h file
   if ((WiFi.status() == WL_CONNECTED))
   {
-    // Here want to get the weather data:
+    // First find the date from an NTP server:
+
+    // Init and get the time
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    //printLocalTime();
+    String date = returnDate();
+    Serial.print("Date: ");
+    Serial.println(date);
+
+    // Next we want to get the data
     byte Attempts = 1;
     WiFiClientSecure client1; // wifi client object
-    
+
     while ((RxCOVID == false) && Attempts <= MAX_ATTEMPTS)
-    { // Try up to MAX_ATTEMPTS for Weather and Forecast data
-      if (RxCOVID  == false) RxCOVID  = obtain_covid_data(client1, "request date", covid_data);
+    {
+      // Try up to MAX_ATTEMPTS for data
+      // ******** SORT OUT DATE RANGE *************
+
+      if (RxCOVID  == false) RxCOVID  = obtain_covid_data(client1, date, covid_data);
       Attempts++;
     }
-
     // Refresh screen if data was received OK, otherwise wait until the next timed check
     if (RxCOVID)
     {
@@ -113,9 +131,15 @@ void setup() {
     {
       stopWiFi(); // Reduces power consumption
       Serial.println("Failed to get Data");
+      // Want to show this on the screen as well
+      // ****** TO DO ***************************
     }
   }
+  //delay(1000);
   digitalWrite(LED_GPIO, LOW);    // Switch off LED - got data
+
+  // To DO: Can I use both sleep and touch mode?
+
   // Now go to sleep: zzzzzz....
   // Setup interrupt on Touch Pad 9 (GPIO32)
   // This is called T8 NOT T9 due to an error in Arduino ID:
@@ -123,7 +147,7 @@ void setup() {
   esp_sleep_enable_touchpad_wakeup();
   Serial.println("ESP will wake up on touch - pin GPIO32");
   Serial.println("Going to sleep now");
-  Serial.flush();
+  //Serial.flush();
   esp_deep_sleep_start();
   Serial.println("This will never be printed");
 }
@@ -131,4 +155,31 @@ void setup() {
 void loop()
 {
   // Using deep sleep we never enter here!
+}
+
+String returnDate() {
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    Serial.println("Failed to obtain time");
+    return ("NA");
+  }
+
+  String timeDate = (String)(timeinfo.tm_year + 1900);
+  if ((timeinfo.tm_mon + 1) < 10)
+  {
+    timeDate += "-0" + (String)(timeinfo.tm_mon + 1);
+  }
+  else
+  {
+    timeDate += "-" + (String)(timeinfo.tm_mon + 1);
+  }
+  if (timeinfo.tm_mday < 10)
+  {
+    timeDate += "-0" + (String)(timeinfo.tm_mday);
+  }
+  else
+  {
+    timeDate += "-" + (String)(timeinfo.tm_mday);
+  }
+  return (timeDate);
 }
