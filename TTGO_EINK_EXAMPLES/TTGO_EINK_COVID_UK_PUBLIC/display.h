@@ -27,11 +27,11 @@
 #include <Fonts/FreeSerifBoldItalic9pt7b.h>
 #include <Fonts/FreeSerifItalic9pt7b.h>
 
-// #define DEFALUT_FONT FreeMono9pt7b
+#define DEFALUT_FONT FreeMono9pt7b
 // #define DEFALUT_FONT FreeMonoBoldOblique9pt7b
 // #define DEFALUT_FONT FreeMonoBold9pt7b
 // #define DEFALUT_FONT FreeMonoOblique9pt7b
-#define DEFALUT_FONT FreeSans9pt7b
+// #define DEFALUT_FONT FreeSans9pt7b
 // #define DEFALUT_FONT FreeSansBold9pt7b
 // #define DEFALUT_FONT FreeSansBoldOblique9pt7b
 // #define DEFALUT_FONT FreeSansOblique9pt7b
@@ -67,9 +67,10 @@ void displayShowCELogo();
 void displayInit();
 void displayUpdate();
 void displayCOVIDInfo(COVID_record_type my_covid_data[]);
+void displayCOVIDGraph(COVID_record_type my_covid_data[], int my_x, int my_y, int my_height, int my_width);
 void displayRadiationInfo(int _dataNumber);
 void displayText(const String &str, int16_t y, uint8_t alignment);
 void displayCEIcon(int x, int y, String IconName);
 void displaySSID(String DISPLAY_SSID, String DISPLAY_PASS);
-void displayUpdatingScreen();
+void displayUpdatingScreen(String my_display_string);
 void displayClear();

@@ -46,7 +46,6 @@
 
 // This is for dealing with the JSON returned data.
 #include <ArduinoJson.h>     // https://github.com/bblanchon/ArduinoJson
-#include <TimeLib.h>  // Include time functions
 
 #include "Config.h"
 #include "CE_Icons.h"        // Curious Electric Icons
@@ -60,20 +59,22 @@
 
 // Variables for the COVID data calls
 boolean RxCOVID = false;                    // Initialise these - have we got the data?
-String  TimeStr, DateStr, ErrorMessage;     // strings to hold time and date
+//String  TimeStr, DateStr, ErrorMessage;     // strings to hold time and date
 
-COVID_record_type  covid_data[1];
+COVID_record_type  covid_data[DATA_STORED];             // This holds the past 100 days of data if needed
+
+String dateArray[DATA_STORED];  // This holds all the dates to look for
 
 const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = -86400;   
-// We want to get yesturdays data, as todays not availabl yet?
-// Subtract 1 days worth of seconds
+const long  gmtOffset_sec = 0;
 const int   daylightOffset_sec = 3600;
+
+RTC_DATA_ATTR int device_mode;
 
 void callback() {
   // Happens if the unit is already awake!
   Serial.println("Touch press");
-  // Can be used to do something with additional press?
+  // Can be used to do something with additional press... Maybe change from local to national?
 }
 
 void setup() {
@@ -82,63 +83,88 @@ void setup() {
   digitalWrite(LED_GPIO, HIGH);   // Switch ON led - show woken up!
   Serial.begin(115200);
 
+  device_mode++;
+  if (device_mode > 1)
+  {
+    device_mode = 0;
+  }
+  
   // Display we are getting an update
   // Show "Getting info for: Country, City"
   displayInit();          // Initialise the display.
   displayShowCELogo();
-  displayUpdatingScreen();
+  if(device_mode==0)
+  {
+    displayUpdatingScreen(MY_CITY);
+  }
+  else if(device_mode==1)
+  {
+    displayUpdatingScreen("Overview");
+  }
   displayUpdate();        // actually show the display...
 
   // Start Wifi - Connect if we have the SSID/PASS or set up AP if not.
   setup_wifi();
 
-  // Here we get the weather data from Open Weather Maps
-  // Need to register account with them and get API key - put that into the Config.h file
+  // Here we get the COVID data from UK GOV website.
   if ((WiFi.status() == WL_CONNECTED))
   {
     // First find the date from an NTP server:
-
     // Init and get the time
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-    //printLocalTime();
-    String date = returnDate();
-    Serial.print("Date: ");
-    Serial.println(date);
+
+    // This just gives us the string for today.
+    // What we really want is the UTC in seconds then subtract and convert into date.
+    for (int n = 0; n < DATA_STORED; n++)
+    {
+      // Here we want to create an array of dates to check the data
+      // Each one is a different day
+      // Adjust the time by a certain amount of seconds and get the date
+      dateArray[n] = returnDate((n + 1));
+      Serial.print("Date: ");
+      Serial.println(dateArray[n]);
+      // At this point we have an array of dates to use to find the data.
+    }
 
     // Next we want to get the data
-    byte Attempts = 1;
     WiFiClientSecure client1; // wifi client object
-
-    while ((RxCOVID == false) && Attempts <= MAX_ATTEMPTS)
+    bool got_data;
+    int attempts;
+    for (int y = 0; y < DATA_STORED; y++)
     {
-      // Try up to MAX_ATTEMPTS for data
-      // ******** SORT OUT DATE RANGE *************
-
-      if (RxCOVID  == false) RxCOVID  = obtain_covid_data(client1, date, covid_data);
-      Attempts++;
+      got_data = false;
+      attempts = 0;
+      while (got_data == false && attempts < MAX_ATTEMPTS)
+      {
+        got_data = obtain_covid_data(client1, dateArray[y], covid_data, y, device_mode);
+        attempts++;
+      }
     }
+    stopWiFi(); // Reduces power consumption
+
     // Refresh screen if data was received OK, otherwise wait until the next timed check
-    if (RxCOVID)
+    if (DEBUG_FLAG == true)
     {
-      stopWiFi(); // Reduces power consumption
-      // ****** Display all the data here: *************************
-      displayClear();
-      // Here we need to deal with data which is JSON format & also display it.
-      displayCOVIDInfo(covid_data);
-      displayUpdate();  // actually show the display...
+      Serial.println(); // Give us a new line,
+      for (int ii = 0; ii < DATA_STORED; ii++)
+      {
+        Serial.print(covid_data[ii].date);
+        Serial.print(" : "); Serial.print(covid_data[ii].areaName);
+        Serial.print(" : "); Serial.print(covid_data[ii].newCases);
+        Serial.print(" : "); Serial.print(covid_data[ii].totalCases);
+        Serial.print(" : "); Serial.print(covid_data[ii].newDeaths);
+        Serial.print(" : "); Serial.println(covid_data[ii].totalDeaths);
+      }
     }
-    else
-    {
-      stopWiFi(); // Reduces power consumption
-      Serial.println("Failed to get Data");
-      // Want to show this on the screen as well
-      // ****** TO DO ***************************
-    }
-  }
-  //delay(1000);
-  digitalWrite(LED_GPIO, LOW);    // Switch off LED - got data
 
-  // To DO: Can I use both sleep and touch mode?
+    // ****** Display all the data here: *************************
+    displayClear();
+    // Here we need to deal with data which is JSON format & also display it.
+    displayCOVIDInfo(covid_data);
+    displayCOVIDGraph(covid_data, 10, 85, 50, 220);
+    displayUpdate();  // actually show the display...
+  }
+  digitalWrite(LED_GPIO, LOW);    // Switch off LED - got data
 
   // Now go to sleep: zzzzzz....
   // Setup interrupt on Touch Pad 9 (GPIO32)
@@ -157,12 +183,27 @@ void loop()
   // Using deep sleep we never enter here!
 }
 
-String returnDate() {
+String returnDate(int _n)
+{
   struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
+  while (!getLocalTime(&timeinfo)) {
     Serial.println("Failed to obtain time");
-    return ("NA");
+    delay(500);
   }
+  time_t timeUTC = mktime(&timeinfo);
+
+  // Want to convert tm into UTC seconds.
+  // Then we can convert back into different dates by subtracting seconds.
+  timeUTC = timeUTC - (_n * 86400); // Remove seconds in a day
+
+  //  // Set timezone to China Standard Time
+  //  setenv("TZ", "CST-8", 1);
+  //  tzset();
+
+  localtime_r(&timeUTC, &timeinfo);
+
+  //  Serial.print("UTC value is: ");
+  //  Serial.println(timeUTC);
 
   String timeDate = (String)(timeinfo.tm_year + 1900);
   if ((timeinfo.tm_mon + 1) < 10)

@@ -62,14 +62,12 @@ void displayRadiationInfo(int _dataNumber)
   display.println(_dataNumber);
 }
 
-void displayUpdatingScreen()
+void displayUpdatingScreen(String _display_string)
 {
   display.setCursor(0, 11);
   display.println("Finding...");
   display.setCursor(0, 31);
-  display.println(MY_CITY);
-  //  display.setCursor(0, 51);
-  //  display.println(MY_COUNTRY);
+  display.println(_display_string);
 }
 
 void displayUpdate()
@@ -83,44 +81,66 @@ void displayCOVIDInfo(COVID_record_type covid_data[])
 {
   // 2.13" e-paper display is 250 x 122 px resolution
 
-  // Display: 
-  // Location: 
+  // Display:
+  // Location   Date
   // New Cases, Cumulative case
   // New Deaths, Cumulative Deaths
   // Graphic for change
   // Percentage change from previous day/7 day average?
 
+  display.setTextSize(0);
+  display.setCursor(0, 11);
+  display.print(covid_data[0].areaName);
+  display.setCursor(0, 28);
+  display.print(covid_data[0].date);
+
   // Here want to display the time and date of most recent update:
+  display.setTextSize(1);
+  display.setCursor(0, 105);
+  display.print(covid_data[0].newCases);
   display.setTextSize(0);
-  display.setCursor(0, 21);
-  display.println("Cases:");
-  display.setCursor(0, 51);
-  display.println("Total:");
-  display.setCursor(0, 81);
-  display.println("Deaths:");
-  display.setCursor(0, 111);
-  display.println("Total:");
+  display.print(" of ");
+  display.print(covid_data[0].totalCases);
 
-  display.setTextSize(2);
-  display.setFont(&FreeMonoBold9pt7b);
-  display.setCursor(80, 21);
-  display.println(covid_data[0].newCasesBySpecimenDate);
-  display.setCursor(80, 81);
-  display.println(covid_data[0].newDeathsByDeathDate);
-
-  display.setTextSize(0);  
-  display.setCursor(80, 51);
-  display.println(covid_data[0].cumCasesBySpecimenDate);
-  display.setCursor(80, 111);
-  display.println(covid_data[0].cumDeathsByDeathDate);
-
+  display.setTextSize(1);
+  display.setCursor(0, 121);
+  display.print(covid_data[0].newDeaths);
   display.setTextSize(0);
-  display.setCursor(180, 21);
-  display.println("Daily");
-  display.setCursor(180, 81);
-  display.println("Daily");
-  
+  display.print(" of ");
+  display.print(covid_data[0].totalDeaths);
   //display.update();
+}
+
+void displayCOVIDGraph(COVID_record_type my_covid_data[], int _x, int _y, int _height, int _width)
+{
+  // This shows a graph of the data within the covid_data[] array
+  // It is drawn at the starting point _x and _y
+
+  display.drawLine(_x, _y, (_width + _x), _y, GxEPD_BLACK);
+
+  // This line is an example of how to do a rectangle
+  //display.fillRect(_x, _y, _width, -_height, GxEPD_BLACK);
+
+  int width_section = _width / (DATA_STORED);
+
+  // Want to find the maximum from the data available:
+  int maximum_value = 0;
+  for (int y = 0; y < DATA_STORED; y++)
+  {
+    if (my_covid_data[y].newCases > maximum_value)
+    {
+      maximum_value = my_covid_data[y].newCases;
+    }
+  }
+  Serial.print("Maximum: ");
+  Serial.println(maximum_value);
+
+  int height_section;
+  for (int i = 0; i < DATA_STORED; i++)
+  {
+    height_section = ((my_covid_data[i].newCases) * _height) / maximum_value;
+    display.fillRect((_x + _width - ((i + 1) * width_section)), _y, width_section, -height_section, GxEPD_BLACK);
+  }
 }
 
 //#################################################################################
@@ -176,6 +196,7 @@ void displaySSID(String _AP_SSID, String _AP_PASS)
 {
   // Want to display the info here for people to log in:
   displayInit();
+  displayClear();
   display.setTextSize(1);
   displayText("Please connect to:", 15, CENTER_ALIGNMENT);
   displayText("198.168.4.1", 30, CENTER_ALIGNMENT);

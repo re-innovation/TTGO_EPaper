@@ -22,7 +22,7 @@
 
 //#########################################################################################
 
-bool obtain_covid_data(WiFiClientSecure& _client, const String& _RequestDate, COVID_record_type _covid_data[])
+bool obtain_covid_data(WiFiClientSecure& _client, const String& _RequestDate, COVID_record_type _covid_data[], int _y, int _mode)
 {
   // Find the rootCAcertificate to use for SSL. Use this tutorial. Firefox has changed, though!
   // https://techtutorialsx.com/2017/11/18/esp32-arduino-https-get-request/
@@ -56,32 +56,33 @@ bool obtain_covid_data(WiFiClientSecure& _client, const String& _RequestDate, CO
   // %22cumCasesByPublishDate%22:%22cumCasesByPublishDate%22,%22newDeathsByDeathDate%22:%22newDeathsByDeathDate%22,
   // %22cumDeathsByDeathDate%22:%22cumDeathsByDeathDate%22}
 
-//  String url_local = "https://" + (String)COVID_SERVER + "/data?filters=areaName=" + (String)MY_CITY + ";date=" + _RequestDate +
-//               "&structure=" \
-//               "{%22date%22:%22date%22,%22areaName%22:%22areaName%22,%22newCasesByPublishDate%22:%22newCasesByPublishDate%22,"
-//               "%22cumCasesByPublishDate%22:%22cumCasesByPublishDate%22,%22newDeathsByDeathDate%22:%22newDeathsByDeathDate%22,"
-//               "%22cumDeathsByDeathDate%22:%22cumDeathsByDeathDate%22}";
-//               //{%22date%22:%22date%22,%22areaName%22:%22areaName%22}";
-  String url_local = "https://" + (String)COVID_SERVER + "/data?filters=areaName=" +(String)MY_CITY + 
-                      ";date=" +_RequestDate +"&structure={%22date%22:%22date%22,%22name%22:%22areaName%22,%22code%22:%22areaCode" +
-                      "%22,%22cases%22:{%22daily%22:%22newCasesBySpecimenDate%22,%22cumulative%22:%22cumCasesBySpecimenDate%22}," +
-                      "%22deaths%22:{%22daily%22:%22newDeathsByDeathDate%22,%22cumulative%22:%22cumDeathsByDeathDate%22}}";
-               
-  String url_country = "https://" + (String)COVID_SERVER + "/data?filters=areaType=nation;areaName=" +(String)MY_CITY + 
-                      ";date=" +_RequestDate +"&structure={%22date%22:%22date%22,%22name%22:%22areaName%22,%22code%22:%22areaCode" +
-                      "%22,%22cases%22:{%22daily%22:%22newCasesByPublishDate%22,%22cumulative%22:%22cumCasesByPublishDate%22}," +
-                      "%22deaths%22:{%22daily%22:%22newDeathsByDeathDate%22,%22cumulative%22:%22cumDeathsByDeathDate%22}}";
+  String url_local = "https://" + (String)COVID_SERVER + "/data?filters=areaName=" + (String)MY_CITY +
+                     ";date=" + _RequestDate + "&structure={%22date%22:%22date%22,%22areaName%22:%22areaName%22,%22code%22:%22areaCode" +
+                     "%22,%22cases%22:{%22newCasesBySpecimenDate%22:%22newCasesBySpecimenDate%22,%22cumCasesBySpecimenDate%22:%22cumCasesBySpecimenDate%22}," +
+                     "%22deaths%22:{%22newDeathsByDeathDate%22:%22newDeathsByDeathDate%22,%22cumDeathsByDeathDate%22:%22cumDeathsByDeathDate%22}}";
+
+  //  String url_country = "https://" + (String)COVID_SERVER + "/data?filters=areaType=nation;areaName=" + (String)MY_CITY +
+  //                       ";date=" + _RequestDate + "&structure={%22date%22:%22date%22,%22name%22:%22areaName%22,%22code%22:%22areaCode" +
+  //                       "%22,%22cases%22:{%22daily%22:%22newCasesByPublishDate%22,%22cumulative%22:%22cumCasesByPublishDate%22}," +
+  //                       "%22deaths%22:{%22daily%22:%22newDeathsByDeathDate%22,%22cumulative%22:%22cumDeathsByDeathDate%22}}";
+
+  String url_overview =  "https://" + (String)COVID_SERVER + "/data?filters=areaType=overview;date=" + _RequestDate +
+                         "&structure={%22date%22:%22date%22,%22areaName%22:%22areaName%22,%22newCasesByPublishDate%22:" +
+                         "%22newCasesByPublishDate%22,%22cumCasesByPublishDate%22:%22cumCasesByPublishDate%22," +
+                         "%22newDeaths28DaysByPublishDate%22:%22newDeaths28DaysByPublishDate%22,%22cumDeaths28DaysByPublishDate%22" +
+                         ":%22cumDeaths28DaysByPublishDate%22}";
 
   // Mount the SPIFFS ready for storing the data.
 
   if (!SPIFFS.begin(true)) {
     Serial.println("An Error has occurred while mounting SPIFFS");
+    return false;
   }
   File file = SPIFFS.open("/stored.gz", FILE_WRITE);
   if (!file) {
     Serial.println("There was an error opening the file for writing");
+    return false;
   }
-
   WiFiClientSecure *client = new WiFiClientSecure;
   if (client)
   {
@@ -90,8 +91,23 @@ bool obtain_covid_data(WiFiClientSecure& _client, const String& _RequestDate, CO
       // Add a scoping block for HTTPClient https to make sure it is destroyed before WiFiClientSecure *client is
       HTTPClient https;
       Serial.print("[HTTPS] begin...\n");
-      Serial.println(url_local);
-      if (https.begin(*client, url_local))   // HTTPS
+
+      String url_request;
+      if (_mode == 0)
+      {
+        url_request = url_local;
+      }
+      else if (_mode == 1)
+      {
+        url_request = url_overview;
+      }
+
+      if (DEBUG_FLAG == true)
+      {
+        Serial.println(url_request);
+
+      }
+      if (https.begin(*client, url_request))   // HTTPS
       {
         Serial.print("[HTTPS] GET...\n");
         // start connection and send HTTP header
@@ -107,11 +123,11 @@ bool obtain_covid_data(WiFiClientSecure& _client, const String& _RequestDate, CO
             // Problem is the data is gzip'd up So looks like gibberish.
             // need to unpack data
             file.print(payload);
-//            Serial.println("Uncompressed Data:");
-//            Serial.println(payload);
           }
-        } else {
+        } else
+        {
           Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
+          return false;
         }
         https.end();
         file.close();
@@ -119,6 +135,7 @@ bool obtain_covid_data(WiFiClientSecure& _client, const String& _RequestDate, CO
       else
       {
         Serial.printf("[HTTPS] Unable to connect\n");
+        return false;
       }
     }
     delete client;
@@ -126,62 +143,79 @@ bool obtain_covid_data(WiFiClientSecure& _client, const String& _RequestDate, CO
   else
   {
     Serial.println("Unable to create client");
+    return false;
   }
-
   // At this point we have got a file with the gzip data in SPIFFS
   // We need to decompress it to another location in SPIFFS
   if ( ! gzExpander(SPIFFS, "/stored.gz", SPIFFS, "/stored.txt") ) {
     Serial.printf("operation failed with return code #%d", tarGzGetError() );
+    return false;
+  }
+  else
+  {
+    // Only want to do this if data is OK.
+    if (_mode == 0)
+    {
+      DecodeCOVID("/stored.txt", "localData", _covid_data, _y);
+    }
+    else if (_mode == 1)
+    {
+      DecodeCOVID("/stored.txt", "overview", _covid_data, _y);
+    }
+    return true;
   }
 
-  File file2 = SPIFFS.open("/stored.txt");
-  if (!file2)
-  {
-    Serial.println("Failed to open file for reading");
-  }
-  String jsonString;
-  while (file2.available())
-  {
-    //Serial.write(file2.read());
-    jsonString += (char)file2.read();
-  }
-  file2.close();
-  Serial.println(jsonString);
-  DecodeCOVID(jsonString, "areaName", _covid_data);
-  return true;
 }
 //#########################################################################################
 // Problems with stucturing JSON decodes, see here: https://arduinojson.org/assistant/
 
-bool DecodeCOVID(String _payload, String _Type, COVID_record_type _covid_data[])
+bool DecodeCOVID(String _fileName, String _Type, COVID_record_type _covid_data[], int _yy)
 {
-  Serial.print(F("Creating object...and "));
-  DynamicJsonDocument doc((20 * 1024) + 1173 ); // allocate the JsonDocument
+  File _file2 = SPIFFS.open(_fileName);
+  if (!_file2)
+  {
+    Serial.println("Failed to open file for reading");
+    return false;
+  }
+  // Read the saved data into one big ole string...
+  String _jsonString;
+  while (_file2.available())
+  {
+    _jsonString += (char)_file2.read();
+  }
+  _file2.close();
+  Serial.println(_jsonString);
 
-  DeserializationError error = deserializeJson(doc, _payload);
+  Serial.print(F("Creating object...and "));
+  DynamicJsonDocument doc(4000); // allocate the JsonDocument
+  DeserializationError error = deserializeJson(doc, _jsonString);
 
   if (error) { // Test if parsing succeeds.// Deserialize the JSON document
     Serial.print("DeserializeJson() failed: ");
     Serial.println(error.c_str());
-    //String ErrorMessage = "DeserializeJson() failed: " + String(error.c_str());
     return false;
   }
   JsonObject root = doc.as<JsonObject>(); // convert it to a JsonObject
   Serial.println(" Decoding " + _Type + " data");
-  if (_Type == "areaName")
+  if (_Type == "localData")
   {
-    _covid_data[0].date                   = root["data"][0]["date"].as<char*>();                  
-    Serial.print("Date: "); Serial.println(_covid_data[0].date);
-    _covid_data[0].areaName               = root["data"][0]["areaName"].as<char*>();              
-    Serial.print("areaName: "); Serial.println(_covid_data[0].areaName);
-    _covid_data[0].newCasesBySpecimenDate  = root["data"][0]["cases"]["daily"];   
-    Serial.print("Cases Daily: "); Serial.println(_covid_data[0].newCasesBySpecimenDate);
-    _covid_data[0].cumCasesBySpecimenDate  = root["data"][0]["cases"]["cumulative"];   
-    Serial.print("Cases Cumulative: "); Serial.println(_covid_data[0].cumCasesBySpecimenDate);
-    _covid_data[0].newDeathsByDeathDate   = root["data"][0]["deaths"]["daily"];   
-    Serial.print("Deaths Daily: "); Serial.println(_covid_data[0].newDeathsByDeathDate);
-    _covid_data[0].cumDeathsByDeathDate   = root["data"][0]["deaths"]["cumulative"];   
-    Serial.print("Deaths Cumulative: "); Serial.println(_covid_data[0].cumDeathsByDeathDate);
+    // This is for the local data
+    _covid_data[_yy].date         = root["data"][0]["date"].as<char*>();
+    _covid_data[_yy].areaName     = root["data"][0]["areaName"].as<char*>();
+    _covid_data[_yy].newCases     = root["data"][0]["cases"]["newCasesBySpecimenDate"];
+    _covid_data[_yy].totalCases   = root["data"][0]["cases"]["cumCasesBySpecimenDate"];
+    _covid_data[_yy].newDeaths    = root["data"][0]["deaths"]["newDeathsByDeathDate"];
+    _covid_data[_yy].totalDeaths  = root["data"][0]["deaths"]["cumDeathsByDeathDate"];
+  }
+  else if (_Type == "overview")
+  {
+    // This is for the local data
+    _covid_data[_yy].date         = root["data"][0]["date"].as<char*>();
+    _covid_data[_yy].areaName     = root["data"][0]["areaName"].as<char*>();
+    _covid_data[_yy].newCases     = root["data"][0]["newCasesByPublishDate"];
+    _covid_data[_yy].totalCases   = root["data"][0]["cumCasesByPublishDate"];
+    _covid_data[_yy].newDeaths    = root["data"][0]["newDeaths28DaysByPublishDate"];
+    _covid_data[_yy].totalDeaths  = root["data"][0]["cumDeaths28DaysByPublishDate"];
   }
   return true;
 }
