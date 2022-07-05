@@ -23,29 +23,33 @@ Three main examples have been included in this repository:
 * Display a random quotation 
 
 You will need to include the ESP32 into your board manager on the Arduino IDE.
+Ensure ESP32 is installed~:
+Put: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json in your preferences
+Then Tools -> Boards -> Board Manager. Click on Board Manager and search for "esp32" and install.
+
 Please follow the instructions here:
 https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/
 
 For these examples you will need to include the following libraries:
-* ESP_WiFiManager by Khoi Howang
-* GxEPD by Jean-Marc Zingg
-
+WiFiManager by tzapu            https://github.com/tzapu/WiFiManager   (via Library Manager)
+ArduinoJson.h                   https://github.com/bblanchon/ArduinoJson   (via Library Manager)
+Adafruit_MQTT by Adafruit       Only needed if you want to get data from Adafruit IO.   (via Library Manager)
 These can be installed via Arduino IDE Library Manager.
 
-When you have installed the library, for the ESP_WiFiManager library you also need to:
-* Got to the folder where the library has been installed (your sketchbook -> libraries).
-* Copy the files from the folder called "src_cpp"
-* Paste them into the folder called "src".
+Also install:
+GxEPD by Lewisxhe at Lilygo   Download from here: https://github.com/lewisxhe/GxEPD
+Then install using library -> add ZIP library
 
-This is because these examples use the older c++ (cpp) files.
+### Setting up WiFi in all examples
 
-To get the E-Paper display working I also needed to ensure I had the correct driver src installed. This is called "GxGDE0213B72B".
-When you have installed the library, for the GxEPD library you also need to:
-* Got to the folder where the library has been installed (your sketchbook -> libraries).
-* Copy the "GxGDE0213B72B" folder from this repository to GxEPD -> src  and paste there.
+The examples all use the WiFiManager to create an access point (AP) for adding your WiFi details. The wifi details are stored and used, unless it cannot connect.
+The screen will show what to do, but at first switch on you need to connect to the access point created (details put onto E-Paper screen along with password). Configure the WiFi and click on your SSID and add your password. The unit will then restart and attempt to connect and get data.
 
+You can always reset the details and put the unit into configuration mode by pressing the small button on the PCB labelled "IO39" - this puts unit into configuration mode for 120 seconds.
 
 ### Open Weather Map example
+
+Upload the example to your E-Paper screen unit via a micro-USB cable, using the Arduino IDE.
 
 You need to create an account with Open Weather Map (https://openweathermap.org/).
 
@@ -53,25 +57,22 @@ Details for connection are here:https://openweathermap.org/api/one-call-api
 
 You need to register and get an API key. With their free level you are limited to a certain number of API calls (1,000,00 a month or 60 per minute!), but for this application the free level is fine.
 
-Within the Config.h file you need to include:
-```
-#define   OWM_KEY       "YOUR OPEN WEATHER MAP KEY"                  // See: https://openweathermap.org/
-#define   OWM_SERVER    "api.openweathermap.org"
-```
+You can add your parameters when configuring the WiFi via the config portal. They are stored in EEPROM, but can be updated by changing in the WiFi config portal.
 
-And also set your location according to Open Weather Map locations
+You need to set the following parameters (set your location according to Open Weather Map locations)
+
 ```
-#define   MY_CITY        "Nottingham"                   // Your home city See: http://bulk.openweathermap.org/sample/
-#define   MY_COUNTRY     "GB"                           // Your country
-#define   MY_LANGUAGE    "EN"                            // NOTE: Only the weather description (not used) is translated by OWM
+OWM_KEY       "YOUR OPEN WEATHER MAP KEY"                  // See: https://openweathermap.org/
+OWM_SERVER    "api.openweathermap.org"
+MY_CITY        "Nottingham"                   // Your home city See: http://bulk.openweathermap.org/sample/
+MY_COUNTRY     "GB"                           // Your country
+MY_LANGUAGE    "EN"                            // NOTE: Only the weather description (not used) is translated by OWM
 // Arabic (AR) Czech (CZ) English (EN) Greek (EL) Persian(Farsi) (FA) Galician (GL) Hungarian (HU) Japanese (JA)
 // Korean (KR) Latvian (LA) Lithuanian (LT) Macedonian (MK) Slovak (SK) Slovenian (SL) Vietnamese (VI)
-#define   MY_HEMISPHERE  "north"                         // or "south"
-#define   MY_UNITS       "M"                             // Use "M" for Metric or I for Imperial
-#define   MY_TIMEZONE    "GMT0BST,M3.5.0/01,M10.5.0/02"  // Choose your time zone from: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
+MY_HEMISPHERE  "north"                         // or "south"
+MY_UNITS       "M"                             // Use "M" for Metric or I for Imperial
+MY_TIMEZONE    "GMT0BST,M3.5.0/01,M10.5.0/02"  // Choose your time zone from: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
 ```
-
-Change these values and then upload using the Arduino IDE.
 
 ### Adafruit IO example
 
@@ -86,12 +87,16 @@ First you need to include your AdafruitIO username and key into the config file:
 #define AIO_SERVERPORT      1883                    // 8883  // Use 8883 if at all possible!
 #define AIO_USERNAME        "YOUR USER NAME"        // This is your Adafruit IO username
 #define AIO_KEY             "YOUR KEY"              // This is your Adafruit IO Key
+#define AIO_FEED            "TOUR FEED HERE"        // This is the Adafruit IO feed you are getting data from. In my case it is "/feeds/airradiation"
 ```
-You then need to set up two feed. One is to subscribe to the feed and the other is publish to feed. As MQTT does not automatically give back a result unless it changes, AdafruitIO has a special case that when we wake up we need to publish (0) to the feed. This will send a message back to any feeds subscribed to the channel, which will give us the latest value. Thats why we need to subscribe and publish with a get here. In these lines change "airradiation" to the name of your feed channel.
+
+The code sets up two feeds. One is to subscribe to the feed and the other is publish to feed. As MQTT does not automatically give back a result unless it changes, AdafruitIO has a special case that when we wake up we need to publish (0) to the feed. This will send a message back to any feeds subscribed to the channel, which will give us the latest value. Thats why we need to subscribe and publish with a get here. Changing the AIO_FEED above will change "airradiation" to the name of your feed channel.
+
 ```
 Adafruit_MQTT_Subscribe airRadiation = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/airradiation");
 Adafruit_MQTT_Publish   getRadiation = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/airradiation/get");
 ```
+
 In the example code this returns a counts per minute value from the radiation sensor. This is displayed, along with the coverted micro-Sv value (which is just multiplied by 0.0057).
 This value also is used to choose the icon to display. I have set three different icons: Low, Medium and High. These were drawn in inkscape and then converted to a 1-bit jpg and then converted to the data file required. Please see my blog post about how I did this, if you are interested (https://www.re-innovation.co.uk/blog/2020/ttgo-e-paper-display/).
 
