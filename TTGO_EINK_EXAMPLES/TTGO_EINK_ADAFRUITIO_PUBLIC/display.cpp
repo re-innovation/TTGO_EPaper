@@ -150,12 +150,38 @@ void displaySSID(String _AP_SSID, String _AP_PASS)
 {
   // Want to display the info here for people to log in:
   displayInit();
+  displayClear();
   display.setTextSize(1);
   displayText("Please connect to:", 15, CENTER_ALIGNMENT);
   displayText("198.168.4.1", 30, CENTER_ALIGNMENT);
   displayText("SSID:", 45, CENTER_ALIGNMENT);
   displayText(_AP_SSID, 60, CENTER_ALIGNMENT);
-  displayText("PASS:", 75, CENTER_ALIGNMENT);
+  displayText("PASSWORD:", 75, CENTER_ALIGNMENT);
   displayText(_AP_PASS, 90, CENTER_ALIGNMENT);
+  display.update();
+}
+
+void displayShutDown()
+{
+  // Tells the user that it has shut down - need to touch to restart in AP
+  displayInit();
+  displayClear();
+  display.setTextSize(1);
+  displayText("WiFi / AP Problem", 30, CENTER_ALIGNMENT);
+  displayText("Gone to sleep....", 60, CENTER_ALIGNMENT);
+  displayText("Touch to wake up", 90, CENTER_ALIGNMENT);
+  display.update();
+}
+
+void displayNoMQTT()
+{
+  // Tells the user that there is an MQTT feed error
+  displayInit();
+  displayClear();
+  display.setTextSize(1);
+  displayText("Error", 30, CENTER_ALIGNMENT);
+  displayText("Check MQTT Feed", 45, CENTER_ALIGNMENT);
+  displayText("Gone to sleep....", 60, CENTER_ALIGNMENT);
+  displayText("Touch to wake up", 90, CENTER_ALIGNMENT);
   display.update();
 }

@@ -1,5 +1,6 @@
 #include "display.h"
 #include "utilities.h"
+#include "weather.h"
 
 // For Eink Paper - Use gxEPD Library
 // include library, include base class, make path known
@@ -67,9 +68,9 @@ void displayUpdatingScreen()
   display.setCursor(0, 11);
   display.println("Finding...");
   display.setCursor(0, 31);
-  display.println(MY_CITY);
+  display.println(owm_settings.MY_CITY);
   display.setCursor(0, 51);
-  display.println(MY_COUNTRY);
+  display.println(owm_settings.MY_COUNTRY);
 }
 
 void displayUpdate()
@@ -180,13 +181,26 @@ void displayCEIcon(int x, int y, String IconName) {
 void displaySSID(String _AP_SSID, String _AP_PASS)
 {
   // Want to display the info here for people to log in:
-  displayInit();
+  //displayInit();
+  displayClear();
   display.setTextSize(1);
   displayText("Please connect to:", 15, CENTER_ALIGNMENT);
   displayText("198.168.4.1", 30, CENTER_ALIGNMENT);
   displayText("SSID:", 45, CENTER_ALIGNMENT);
   displayText(_AP_SSID, 60, CENTER_ALIGNMENT);
-  displayText("PASS:", 75, CENTER_ALIGNMENT);
+  displayText("PASSWORD:", 75, CENTER_ALIGNMENT);
   displayText(_AP_PASS, 90, CENTER_ALIGNMENT);
+  display.update();
+}
+
+void displayShutDown()
+{
+  // Tells the user that it has shut down - need to touch to restart in AP
+  displayInit();
+  displayClear();
+  display.setTextSize(1);
+  displayText("WiFi / AP Problem", 30, CENTER_ALIGNMENT);
+  displayText("Gone to sleep....", 60, CENTER_ALIGNMENT);
+  displayText("Touch to wake up", 90, CENTER_ALIGNMENT);
   display.update();
 }

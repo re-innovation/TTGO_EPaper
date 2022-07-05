@@ -69,6 +69,7 @@ void displayUpdate();
 void displayText(const String &str, int16_t y, uint8_t alignment);
 void displayCEIcon(int x, int y, String IconName);
 void displaySSID(String DISPLAY_SSID, String DISPLAY_PASS);
+void displayShutDown();
 void displayUpdatingScreen();
 void displayClear();
 void displayQuote(String my_quote, String my_author);

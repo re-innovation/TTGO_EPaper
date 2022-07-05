@@ -167,7 +167,19 @@ void displaySSID(String _AP_SSID, String _AP_PASS)
   displayText("198.168.4.1", 30, CENTER_ALIGNMENT);
   displayText("SSID:", 45, CENTER_ALIGNMENT);
   displayText(_AP_SSID, 60, CENTER_ALIGNMENT);
-  displayText("PASS:", 75, CENTER_ALIGNMENT);
+  displayText("PASSWORD:", 75, CENTER_ALIGNMENT);
   displayText(_AP_PASS, 90, CENTER_ALIGNMENT);
+  display.update();
+}
+
+void displayShutDown()
+{
+  // Tells the user that it has shut down - need to touch to restart in AP
+  displayInit();
+  displayClear();
+  display.setTextSize(1);
+  displayText("WiFi / AP Problem", 30, CENTER_ALIGNMENT);
+  displayText("Gone to sleep....", 60, CENTER_ALIGNMENT);
+  displayText("Touch to wake up", 90, CENTER_ALIGNMENT);
   display.update();
 }

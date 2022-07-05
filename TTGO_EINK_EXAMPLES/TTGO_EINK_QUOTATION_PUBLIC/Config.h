@@ -16,11 +16,19 @@
 
 #define   LED_GPIO              19
 
-// If we are using SLEEP mode:
+//#define   WAKE_UP_MODE        "TIMER"     // If = "TIMER" then it will wake up every TIME_TO_SLEEP seconds
+#define   WAKE_UP_MODE        "TOUCH"     // If = "TOUCH" then it will wake up one a touch.
+
+// If we are using TIMER mode:
 #define   TIME_TO_SLEEP      900          // Time (in seconds) between wake ups - every 15mins
 #define   uS_TO_S_FACTOR     1000000ULL   /* Conversion factor for micro seconds to seconds */
 
 // If we are using TOUCH WAKE UP mode:
 //Setup interrupt on Touch Pad 9 (GPIO32)
-#define   WAKE_UP_PIN       T8        // This is called T8 NOT T9 due to an error in Arduino IDE
+#define   WAKE_UP_PIN       T9        
 #define   THRESHOLD         50        /* Greater the value, more the sensitivity */
+
+//Setup interrupt on GPIO39 to reset and put unit into AP mode (even if it could connect
+// GPIO39 = RTC_GPIO03
+//#define   CONFIG_WAKE_UP_PIN    GPIO_NUM_39
+#define BUTTON_PIN_BITMASK      0x8000000000    // 2^39 in HEX

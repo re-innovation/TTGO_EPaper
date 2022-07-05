@@ -14,7 +14,7 @@
   #define  ESP_getChipId()   (ESP.getChipId())
 #endif
 
-extern void print_wakeup_reason();
+extern bool print_wakeup_reason();
 extern void print_wakeup_touchpad();
 String digitalClockDisplay(long int my_timeUTC);
 String findHours(String my_period);

@@ -69,5 +69,7 @@ void displayRadiationInfo(int _dataNumber);
 void displayText(const String &str, int16_t y, uint8_t alignment);
 void displayCEIcon(int x, int y, String IconName);
 void displaySSID(String DISPLAY_SSID, String DISPLAY_PASS);
+void displayShutDown();
+void displayNoMQTT();
 void displayUpdatingScreen();
 void displayClear();

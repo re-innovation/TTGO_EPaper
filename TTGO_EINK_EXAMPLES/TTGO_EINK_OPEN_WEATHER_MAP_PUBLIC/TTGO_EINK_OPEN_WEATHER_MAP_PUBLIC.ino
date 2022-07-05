@@ -16,31 +16,31 @@
 // If they are stored then the unit does the following (in this example):
 //  - checks the weather from Open Weather API
 //
+// Ensure ESP32 is installed~:
+// Put: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json in your preferences
+// The Board Manager -> search for "esp32" and include those boards
+//
 // If using Arduino IDE: Must use "ESP32 Dev Module"
 //
 // You MUST include the following libraries:
-//    GxEPD by Jean-Marc Zingg        - I needed to make sure I had the correct EPaper driver.
-//    ESP_Wifi_Manager by Khoi Howang - I had to use the older type with cpp and h files. See github for details.
+//    WiFiManager by tzapu           https://github.com/tzapu/WiFiManager   (via Library Manager)
+//    ArduinoJson.h                // https://github.com/bblanchon/ArduinoJson   (via Library Manager)
+//    GxEPD by Lewisxhe at Lilygo   Download from here: https://github.com/lewisxhe/GxEPD
+//    Then install using library -> add ZIP library
+//
+// Annoyingly there are two different EPaper displays used by Lilygo.
+// You might need to try both and see which looks best
+// Version 1:
+// Then need to copy the "GxGDE0213B72B" folder from the examples on my github
+// Copy it to the GxEPD folder in your arduino libraries. then place in src along with the other board definitions
+//
+// Version 2:
+// The EPaper driver is already installed
 //
 
-#if !( defined(ESP8266) ||  defined(ESP32) )
-#error This code is intended to run on the ESP8266 or ESP32 platform! Please check your Tools->Board setting.
-#endif
+#include "EEPROM.h"
 
-//Ported to ESP32
-#ifdef ESP32
-#include <esp_wifi.h>
-#include <WiFi.h>
-#include <WiFiClient.h>
-//#include <WiFiClientSecure.h>
-#include <HTTPClient.h>
-#define  ESP_getChipId()   ((uint32_t)ESP.getEfuseMac())
-#else
-#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#define  ESP_getChipId()   (ESP.getChipId())
-#endif
+#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 
 // This is for dealing with the JSON returned data.
 #include <ArduinoJson.h>     // https://github.com/bblanchon/ArduinoJson
@@ -55,6 +55,11 @@
 #include "time.h"            // Built-in
 #include "utilities.h"
 #include "weather.h"
+
+
+// WiFiFlientSecure for SSL/TLS support
+//WiFiClientSecure client;
+WiFiClient client;
 
 // Variables for the weather calls
 boolean RxWeather = false, RxForecast = false;    // Initialise these - have we got the data?
@@ -75,17 +80,36 @@ void setup() {
   digitalWrite(LED_GPIO, HIGH);   // Switch ON led - show woken up!
   Serial.begin(115200);
 
+  // What is the wake up reason?
+  bool reset_wifi_flag = print_wakeup_reason();
+  print_wakeup_touchpad();
+  Serial.print("Put unit into AP mode? ");
+  Serial.println(reset_wifi_flag);
+
+  //Init EEPROM
+  EEPROM.begin(1000);
+
+  // Check EEPROM for the unit data:
+  owm_settings.OWM_KEY      = EEPROM.readString(0x0);
+  owm_settings.OWM_SERVER   = EEPROM.readString(0x100);
+  owm_settings.MY_CITY      = EEPROM.readString(0x150);
+  owm_settings.MY_COUNTRY   = EEPROM.readString(0x200);
+  owm_settings.MY_LANGUAGE  = EEPROM.readString(0x250);
+  owm_settings.MY_HEMISPHERE = EEPROM.readString(0x260);
+  owm_settings.MY_UNITS     = EEPROM.readString(0x270);
+  owm_settings.MY_TIMEZONE  = EEPROM.readString(0x280);
+
+  printStoredData();
   // Display we are getting an update
   // Show "Getting info for: Country, City"
   displayInit();          // Initialise the display.
-
   displayShowCELogo();
   displayUpdatingScreen();
   displayUpdate();        // actually show the display...
-  
+
   // Start Wifi - Connect if we have the SSID/PASS or set up AP if not.
-  setup_wifi();
-  
+  setup_wifi(reset_wifi_flag);
+
   // Here we get the weather data from Open Weather Maps
   // Need to register account with them and get API key - put that into the Config.h file
   if ((WiFi.status() == WL_CONNECTED))
@@ -104,7 +128,6 @@ void setup() {
     if (RxWeather || RxForecast)
     {
       stopWiFi(); // Reduces power consumption
-      
       // ****** Display all the data here: *************************
       displayClear();
       // Here we need to deal with data which is JSON format & also display it.
@@ -118,13 +141,38 @@ void setup() {
     }
   }
   digitalWrite(LED_GPIO, LOW);    // Switch off LED - got data
-  // Now go to sleep: zzzzzz....
-  // Setup interrupt on Touch Pad 9 (GPIO32)
-  // This is called T8 NOT T9 due to an error in Arduino ID:
-  touchAttachInterrupt(WAKE_UP_PIN, callback, THRESHOLD);
-  // touchAttachInterrupt(T8, callback, THRESHOLD);
-  esp_sleep_enable_touchpad_wakeup();
-  Serial.println("ESP will wake up on touch - pin GPIO32");
+  // ################ SLEEP TYPE #####################################
+  if (WAKE_UP_MODE == "TIMER")
+  {
+    // **** TIMER WAKE UP ******************************************
+    esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+    esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK, ESP_EXT1_WAKEUP_ALL_LOW);        // Also add an external pin wake up
+    Serial.println("ESP to sleep for every " + String(TIME_TO_SLEEP) + " s");
+    Serial.println("Push GPIO39 to start config AP");
+  }
+  else if (WAKE_UP_MODE == "TOUCH")
+  {
+    // **** TOUCH PAD WAKE UP ******************************************
+    // Setup interrupt on Touch Pad 9 (GPIO32)
+    touchAttachInterrupt(WAKE_UP_PIN, callback, THRESHOLD);
+    esp_sleep_enable_touchpad_wakeup();
+    esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK, ESP_EXT1_WAKEUP_ALL_LOW);        // Also add an external pin wake up
+    Serial.println("ESP will wake up on touch - pin GPIO32");
+    Serial.println("Push GPIO39 to start config AP");
+  }
+  else
+  {
+    // Default case, just in case, is touch - you can change this
+    // **** TOUCH PAD WAKE UP ******************************************
+    // Setup interrupt on Touch Pad 9 (GPIO32)
+    touchAttachInterrupt(WAKE_UP_PIN, callback, THRESHOLD);
+    esp_sleep_enable_touchpad_wakeup();
+    esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK, ESP_EXT1_WAKEUP_ALL_LOW);        // Also add an external pin wake up
+    Serial.println("No Sleep Mode Set!!!");
+    Serial.println("ESP will wake up on touch - pin GPIO32");
+    Serial.println("Push GPIO39 to start config AP");
+  }
+  //################################################################
   Serial.println("Going to sleep now");
   Serial.flush();
   esp_deep_sleep_start();

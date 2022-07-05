@@ -77,10 +77,12 @@
 
 //#include <GxGDE0213B1/GxGDE0213B1.h>        // 2.13" b/w
 //#include <GxGDE0213B72/GxGDE0213B72.h>      // 2.13" b/w     GxGDE0213B1 升级版本
-#include <GxGDE0213B72B/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
+// Version 1:
+// #include <GxGDE0213B72B/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
+//Version 2:
+#include <GxDEPG0213BN/GxDEPG0213BN.h>      // 2.13" b/w  form DKE GROUP
 //#include <GxGDE0213B72B/GxGDE0213B72B.h>    // 2.13" b/w
 //#include <GxGDEH0213B72/GxGDEH0213B72.h>     // 2.13" b/w new panel
-
 #define SPI_MOSI 23
 #define SPI_MISO -1
 #define SPI_CLK 18

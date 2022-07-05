@@ -1,8 +1,7 @@
 #pragma once
 
-// ESP_wfifmanager
-#include <ESP_WiFiManager.h>              //https://github.com/khoih-prog/ESP_WiFiManager
-//#include <WiFiClientSecure.h>
+// WiFimanager
+#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 
-void setup_wifi();
+void setup_wifi(bool my_reset_settings_flag = false);
 void stopWiFi();

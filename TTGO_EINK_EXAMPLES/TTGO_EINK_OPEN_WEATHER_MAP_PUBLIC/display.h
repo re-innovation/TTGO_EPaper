@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <Arduino.h>
 #include "Config.h"
-
+#include "weather.h"
 
 // For Eink Paper - Use gxEPD Library
 // include library, include base class, make path known
@@ -71,5 +71,6 @@ void displayRadiationInfo(int _dataNumber);
 void displayText(const String &str, int16_t y, uint8_t alignment);
 void displayCEIcon(int x, int y, String IconName);
 void displaySSID(String DISPLAY_SSID, String DISPLAY_PASS);
+void displayShutDown();
 void displayUpdatingScreen();
 void displayClear();
