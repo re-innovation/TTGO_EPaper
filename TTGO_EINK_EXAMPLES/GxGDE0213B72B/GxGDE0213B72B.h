@@ -17,8 +17,8 @@
 #include "../GxEPD.h"
 
 // the physical number of pixels (for controller parameter)
-#define GxGDE0213B72B_X_PIXELS 128
-#define GxGDE0213B72B_Y_PIXELS 250
+#define GxGDE0213B72B_X_PIXELS 104
+#define GxGDE0213B72B_Y_PIXELS 212
 
 // the logical width and height of the display
 #define GxGDE0213B72B_WIDTH GxGDE0213B72B_X_PIXELS
