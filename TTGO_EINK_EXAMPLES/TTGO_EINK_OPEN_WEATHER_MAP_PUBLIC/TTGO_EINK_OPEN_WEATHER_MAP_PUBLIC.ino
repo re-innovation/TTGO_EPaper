@@ -28,15 +28,21 @@
 //    GxEPD by Lewisxhe at Lilygo   Download from here: https://github.com/lewisxhe/GxEPD
 //    Then install using library -> add ZIP library
 //
+// You MUST then copy the "GxGDE0213B72B_CE" & "GxDEPG0213BN_CE" folders from the examples in the Curious Electric repository
+// Copy them BOTH to the "your sketchbook\yourlibraries\GxEPD\src" folder in your arduino libraries (on my computer this is "D:\sketchbook\libraries\GxEPD\src\"). 
+// You will see a big list of the various boards available.
+// Please delete the original "GxGDE0213B72B" & "GxDEPG0213BN" as they confuse the compiler.
+
 // Annoyingly there are two different EPaper displays used by Lilygo.
 // You might need to try both and see which looks best
+// Change this within the "board_def.h" page in this arduino code - comment out either version 1 or 2.
+// This will be a process of trial and error - the wrong driver will give you a 'washed out' display and look faded:
+// eg:
 // Version 1:
-// Then need to copy the "GxGDE0213B72B" folder from the examples on my github
-// Copy it to the GxEPD folder in your arduino libraries. then place in src along with the other board definitions
-//
+// //#include <GxGDE0213B72B_CE/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
 // Version 2:
-// The EPaper driver is already installed
-//
+// #include <GxDEPG0213BN_CE/GxDEPG0213BN.h>      // 2.13" b/w  form Curious Electric
+
 
 #include "EEPROM.h"
 
