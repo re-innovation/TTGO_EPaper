@@ -63,16 +63,19 @@ Please delete the original "GxGDE0213B72B" & "GxDEPG0213BN" as they confuse the 
 Annoyingly there are two different EPaper displays used by Lilygo.
 You might need to try both and see which looks best.
 
-Change this within the "board_def.h" page in the example arduino code - comment out either version 1 or 2.
-
-(This will be a process of trial and error - the wrong driver will give you a 'washed out' display and look faded)
+Change this within the "board_def.h" page in the example arduino code. Scroll down the "board_def.h" file until you see the following code:
 
 ```
-Version 1:
-//#include <GxGDE0213B72B_CE/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 
-Version 2:
+#elif (TTGO_T5_2_0) || (TTGO_T5_2_3)
+// Version 1:
+//#include <GxGDE0213B72B_CE/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
+//Version 2:
 #include <GxDEPG0213BN_CE/GxDEPG0213BN.h>      // 2.13" b/w  form Curious Electric
 ```
+
+Then comment out either version 1 or 2.
+
+(This will be a process of trial and error - the wrong driver will give you a 'washed out' display and look faded)
 
 ### Setting up WiFi in all examples
 
