@@ -23,11 +23,14 @@ Three main examples have been included in this repository:
 * Display a random quotation 
 
 You will need to include the ESP32 into your board manager on the Arduino IDE.
-Ensure ESP32 is installed~:
-Put: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json in your preferences
+Ensure ESP32 is installed:
+
+Put: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json in your preferences.
+
 Then Tools -> Boards -> Board Manager. Click on Board Manager and search for "esp32" and install.
 
 Please follow the instructions here:
+
 https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/
 
 For these examples you will need to include the following libraries:
