@@ -16,27 +16,11 @@
 // If they are stored then the unit does the following (in this example):
 // - downloads a random quote and displays the text and author.
 //
-// Ensure ESP32 is installed~:
-// Put: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json in your preferences
-// The Board Manager -> search for "esp32" and include those boards
+// Please follow the set-up instructions found here: https://github.com/re-innovation/TTGO_EPaper/blob/master/README.md
+// This explains the libraries needed to upload this example code.
 //
-// If using Arduino IDE: Must use "ESP32 Dev Module"
+// When uploading using Arduino IDE: Must use "ESP32 Dev Module"
 //
-// You MUST include the following libraries:
-//    WiFiManager by tzapu https://github.com/tzapu/WiFiManager
-//    GxEPD by Lewisxhe at Lilygo   Download from here: https://github.com/lewisxhe/GxEPD
-//    Then install using library -> add ZIP library
-//    
-//    
-// Annoyingly there are two different EPaper displays used by Lilygo.
-// You might need to try both and see which looks best
-// Version 1:
-// Then need to copy the "GxGDE0213B72B" folder from the examples on my github
-// Copy it to the GxEPD folder in your arduino libraries. then place in src along with the other board definitions
-// 
-// Version 2:
-// The EPaper driver is already installed
-//    
 
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 

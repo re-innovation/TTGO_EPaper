@@ -74,7 +74,6 @@
 #define SPEAKER_OUT 25
 
 #elif (TTGO_T5_2_0) || (TTGO_T5_2_3)
-
 // Version 1:
 //#include <GxGDE0213B72B_CE/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
 //Version 2:

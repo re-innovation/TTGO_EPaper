@@ -16,33 +16,11 @@
 // If they are stored then the unit does the following (in this example):
 //  - checks the weather from Open Weather API
 //
-// Ensure ESP32 is installed~:
-// Put: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json in your preferences
-// The Board Manager -> search for "esp32" and include those boards
+// Please follow the set-up instructions found here: https://github.com/re-innovation/TTGO_EPaper/blob/master/README.md
+// This explains the libraries needed to upload this example code.
 //
-// If using Arduino IDE: Must use "ESP32 Dev Module"
+// When uploading using Arduino IDE: Must use "ESP32 Dev Module"
 //
-// You MUST include the following libraries:
-//    WiFiManager by tzapu           https://github.com/tzapu/WiFiManager   (via Library Manager)
-//    ArduinoJson.h                // https://github.com/bblanchon/ArduinoJson   (via Library Manager)
-//    GxEPD by Lewisxhe at Lilygo   Download from here: https://github.com/lewisxhe/GxEPD
-//    Then install using library -> add ZIP library
-//
-// You MUST then copy the "GxGDE0213B72B_CE" & "GxDEPG0213BN_CE" folders from the examples in the Curious Electric repository
-// Copy them BOTH to the "your sketchbook\yourlibraries\GxEPD\src" folder in your arduino libraries (on my computer this is "D:\sketchbook\libraries\GxEPD\src\"). 
-// You will see a big list of the various boards available.
-// Please delete the original "GxGDE0213B72B" & "GxDEPG0213BN" as they confuse the compiler.
-
-// Annoyingly there are two different EPaper displays used by Lilygo.
-// You might need to try both and see which looks best
-// Change this within the "board_def.h" page in this arduino code - comment out either version 1 or 2.
-// This will be a process of trial and error - the wrong driver will give you a 'washed out' display and look faded:
-// eg:
-// Version 1:
-// //#include <GxGDE0213B72B_CE/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
-// Version 2:
-// #include <GxDEPG0213BN_CE/GxDEPG0213BN.h>      // 2.13" b/w  form Curious Electric
-
 
 #include "EEPROM.h"
 
