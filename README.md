@@ -22,6 +22,8 @@ Three main examples have been included in this repository:
 * Connect to an Adafruit IO feed and display the data
 * Display a random quotation 
 
+### Sort out Arduino IDE to upload data to the ESP32:
+
 You will need to include the ESP32 into your board manager on the Arduino IDE.
 Ensure ESP32 is installed:
 
@@ -32,6 +34,8 @@ Then Tools -> Boards -> Board Manager. Click on Board Manager and search for "es
 Please follow the instructions here:
 
 https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/
+
+### Include the correct libraries for the examples to compile:
 
 For these examples you will need to include the following libraries:
 
