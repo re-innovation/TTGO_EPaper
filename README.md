@@ -31,14 +31,31 @@ Please follow the instructions here:
 https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/
 
 For these examples you will need to include the following libraries:
-WiFiManager by tzapu            https://github.com/tzapu/WiFiManager   (via Library Manager)
-ArduinoJson.h                   https://github.com/bblanchon/ArduinoJson   (via Library Manager)
+WiFiManager by tzapu            https://github.com/tzapu/WiFiManager  (version: 2.0.15-rc-1) (via Library Manager)
+ArduinoJson.h                   https://github.com/bblanchon/ArduinoJson  (version 6.20.1) (via Library Manager)
+TimeLib.h                       https://github.com/PaulStoffregen/Time (via Library Manager)
+AdaFruit_GFX.h                  https://github.com/adafruit/Adafruit-GFX-Library (version 1.11.5) (and dependancy Adafruit BusIO (14.1)  (via Library Manager)
 Adafruit_MQTT by Adafruit       Only needed if you want to get data from Adafruit IO.   (via Library Manager)
 These can be installed via Arduino IDE Library Manager.
 
 Also install:
 GxEPD by Lewisxhe at Lilygo   Download from here: https://github.com/lewisxhe/GxEPD
 Then install using library -> add ZIP library
+
+You MUST then copy the "GxGDE0213B72B_CE" & "GxDEPG0213BN_CE" folders from the examples in this repository
+Copy them BOTH to the "your sketchbook\yourlibraries\GxEPD\src" folder in your arduino libraries (on my computer this is "D:\sketchbook\libraries\GxEPD\src\"). 
+You will see a big list of the various boards available.
+Please delete the original "GxGDE0213B72B" & "GxDEPG0213BN" as they confuse the compiler.
+
+Annoyingly there are two different EPaper displays used by Lilygo.
+You might need to try both and see which looks best
+Change this within the "board_def.h" page in the example arduino code - comment out either version 1 or 2.
+This will be a process of trial and error - the wrong driver will give you a 'washed out' display and look faded:
+eg:
+Version 1:
+//#include <GxGDE0213B72B_CE/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
+Version 2:
+#include <GxDEPG0213BN_CE/GxDEPG0213BN.h>      // 2.13" b/w  form Curious Electric
 
 ### Setting up WiFi in all examples
 
