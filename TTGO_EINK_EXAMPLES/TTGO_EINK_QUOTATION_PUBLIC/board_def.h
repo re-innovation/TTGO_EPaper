@@ -74,10 +74,12 @@
 #define SPEAKER_OUT 25
 
 #elif (TTGO_T5_2_0) || (TTGO_T5_2_3)
-// Version 1:
+//// Version 1:
 //#include <GxGDE0213B72B_CE/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
-//Version 2:
-#include <GxDEPG0213BN_CE/GxDEPG0213BN.h>      // 2.13" b/w  form Curious Electric
+////Version 2:
+//#include <GxDEPG0213BN_CE/GxDEPG0213BN.h>      // 2.13" b/w  from Curious Electric
+//Version 3:
+#include <GxGDEM0213B74_CE/GxGDEM0213B74.h>      // 2.13" b/w  from Curious Electric
 
 #define SPI_MOSI 23
 #define SPI_MISO -1

@@ -32,3 +32,6 @@
 // GPIO39 = RTC_GPIO03
 //#define   CONFIG_WAKE_UP_PIN    GPIO_NUM_39
 #define BUTTON_PIN_BITMASK      0x8000000000    // 2^39 in HEX
+
+#define EP_OFFSET           6   // Slight change in display unit - different 0?
+//#define EP_OFFSET           0   // Original version.
