@@ -17,10 +17,13 @@ These have been designed in Inkscape and laser cut with Lightburn software.
 
 ## Examples
 
-Three main examples have been included in this repository:
+Some examples have been included in this repository:
+
 * Connect to Open Weather Map and display weather data
-* Connect to an Adafruit IO feed and display the data
-* Display a random quotation 
+* Display a random quotation
+* Display the UK grid frequency
+
+The examples are all bundled into one code example. This saves repeating any changes for the E-Paper display and the Wifi implementation. Hopefully from the examples it can be seen different approaches to equiring and responding to data. These are for example only.
 
 ### Sort out Arduino IDE to upload data to the ESP32:
 
@@ -34,6 +37,8 @@ Then Tools -> Boards -> Board Manager. Click on Board Manager and search for "es
 Please follow the instructions here:
 
 https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/
+
+When uploading to the board use the "ESP32 Dev Module" option as the type of board.
 
 ### Include the correct libraries for the examples to compile:
 
@@ -49,35 +54,8 @@ These can be installed via Arduino IDE Library Manager:
 
 Also install:
 
-* GxEPD by Lewisxhe at Lilygo   Download from here: https://github.com/lewisxhe/GxEPD
-Then install using library -> add ZIP library
-
-You MUST then copy the "GxGDE0213B72B_CE" & "GxDEPG0213BN_CE" & "GxGDEM0213B74_CE" folders from the examples in this repository.
-
-Copy them BOTH to the "your sketchbook\yourlibraries\GxEPD\src" folder in your arduino libraries (on my computer this is "D:\sketchbook\libraries\GxEPD\src\"). 
-
-You will see a big list of the various boards available.
-
-Please delete the original "GxGDE0213B72B" & "GxDEPG0213BN" & "GxGDEM0213B74" as they confuse the compiler.
-
-Annoyingly there are two different EPaper displays used by Lilygo.
-You might need to try both and see which looks best.
-
-Change this within the "board_def.h" page in the example arduino code. Scroll down the "board_def.h" file until you see the following code:
-
-```
-#elif (TTGO_T5_2_0) || (TTGO_T5_2_3)
-// Version 1:
-//#include <GxGDE0213B72B_CE/GxGDE0213B72B.h>    // 2.13" b/w     GxGDE0213B72 升级版本 默认LilyGO的出厂屏幕都是这种
-//Version 2:
-//#include <GxDEPG0213BN_CE/GxDEPG0213BN.h>      // 2.13" b/w  form Curious Electric
-//Version 3:
-#include <GxGDEM0213B74_CE/GxGDEM0213B74.h>      // 2.13" b/w  from Curious Electric
-```
-
-Then comment out either version 1 or 2 or 3.
-
-(This will be a process of trial and error - the wrong driver will give you a 'washed out' display and look faded)
+* GxEPD2                          Download from here: [https://github.com/ZinggJM/GxEPD2](https://github.com/ZinggJM/GxEPD2)
+Then install using library -> add ZIP library OR search for GxEPD2 repository in the library manager and install
 
 ### Setting up WiFi in all examples
 
@@ -92,7 +70,7 @@ Upload the example to your E-Paper screen unit via a micro-USB cable, using the 
 
 You need to create an account with Open Weather Map (https://openweathermap.org/).
 
-Details for connection are here:https://openweathermap.org/api/one-call-api
+DEPRECIATED: Details for connection are here: https://openweathermap.org/api/one-call-api
 
 You need to register and get an API key. With their free level you are limited to a certain number of API calls (1,000,00 a month or 60 per minute!), but for this application the free level is fine.
 
@@ -113,42 +91,18 @@ MY_UNITS       "M"                             // Use "M" for Metric or I for Im
 MY_TIMEZONE    "GMT0BST,M3.5.0/01,M10.5.0/02"  // Choose your time zone from: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
 ```
 
-### Adafruit IO example
-
-This example shows how to read a data feed from your own AdafruitIO feeds (https://io.adafruit.com/). You will need to make an account with AdafruitIO (free for up to 5 feeds).
-
-I have already set up a feed from a radiation sensor in my workshop. 
-You will need to change a few thuings to get your feed running.
-
-First you need to include your AdafruitIO username and key into the config file:
-```
-#define AIO_SERVER          "io.adafruit.com"       // direct
-#define AIO_SERVERPORT      1883                    // 8883  // Use 8883 if at all possible!
-#define AIO_USERNAME        "YOUR USER NAME"        // This is your Adafruit IO username
-#define AIO_KEY             "YOUR KEY"              // This is your Adafruit IO Key
-#define AIO_FEED            "TOUR FEED HERE"        // This is the Adafruit IO feed you are getting data from. In my case it is "/feeds/airradiation"
-```
-
-The code sets up two feeds. One is to subscribe to the feed and the other is publish to feed. As MQTT does not automatically give back a result unless it changes, AdafruitIO has a special case that when we wake up we need to publish (0) to the feed. This will send a message back to any feeds subscribed to the channel, which will give us the latest value. Thats why we need to subscribe and publish with a get here. Changing the AIO_FEED above will change "airradiation" to the name of your feed channel.
-
-```
-Adafruit_MQTT_Subscribe airRadiation = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/airradiation");
-Adafruit_MQTT_Publish   getRadiation = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/airradiation/get");
-```
-
-In the example code this returns a counts per minute value from the radiation sensor. This is displayed, along with the coverted micro-Sv value (which is just multiplied by 0.0057).
-This value also is used to choose the icon to display. I have set three different icons: Low, Medium and High. These were drawn in inkscape and then converted to a 1-bit jpg and then converted to the data file required. Please see my blog post about how I did this, if you are interested (https://www.re-innovation.co.uk/blog/2020/ttgo-e-paper-display/).
-
-This example code can either be set to wake with a touch press or on a timer. I'm using a timer to check every 2 hours... 
-
 ### Quotation Unit example
 
-This example does not need any user info. Just upload this example code. Then switch on your e-ink display and connect to the WiFi access point, as per the on-screen instructions.
+This example does not need any user info. Just upload this code varion. Then switch on your e-ink display and connect to the WiFi access point, as per the on-screen instructions.
 When you enter your wifi password and SSID then it will restart and download a random quote. A new quote will appear each time the touch pad is pressed.
 
 This code uses the following website, https://forismatic.com/en/, which returns a quote and the author as a line of text.
 
 The final URL used to send via an http GET request is: http://api.forismatic.com/api/1.0/?method=getQuote&key=&format=text&lang=en
+
+### Grid Frequency example
+
+
 
 ## More information
 
@@ -166,3 +120,43 @@ https://www.re-innovation.co.uk/blog/2020/ttgo-e-paper-display/
 
 https://www.re-innovation.co.uk/docs/creating-a-weather-display/
 
+
+## Updates:
+
+### Problems Encountered:
+
+In these next sections I'm highlighting the code changes required to get this project going from the previous code that I had written. This is for information only, as it has been a while since I have developed any code the E-Paper screen.
+
+### Problem: Library Update:
+
+The libraries for the E-Paper unit have been updated and my code (from 2024) no longer compiles correctly. I decided the make the changes required to go from using GxEPD to using GxEPD2. LilyGo (who manufacture the ESP32 E-Ink board) have some updated example code to use which I needed as the starting point for updating: https://github.com/Xinyuan-LilyGO/LilyGo-T5-Epaper-Series/tree/master
+
+The changes were not too bad and using the example code for LilyGo I was able to update the code so that the screen would display some information.
+
+### Problem: Touch Wake Up:
+
+The next issue was that the espressif libraries for setting up a touch pad had also changed. So I needed to change the code for going to sleep. Instead of:
+
+&nbsp;touchAttachInterrupt(WAKE_UP_PIN, callback, THRESHOLD);
+&nbsp;esp_sleep_enable_touchpad_wakeup();
+
+I needed to use:
+
+touchSleepWakeUpEnable(WAKE_UP_PIN, THRESHOLD);
+
+This works and the unit will wake up from the touch input.
+
+But the routine for returning the GPIO pin that has been triggered with the touch does not seem to work. I use:
+
+&nbsp; touch_pad_t touchPin;
+&nbsp; touchPin = (touch_pad_t)esp_sleep_get_touchpad_wakeup_status();
+
+This works fine, but always returns '512', rather than the 0-9 which should enumerate to the different GPIO pins. This is still not fixed, if anyone has any solutions?
+
+### Problem: Curious Electric logo is mirrored
+
+Previously I drew a small black and white Curious Electric logo while the unit powered up. I was using the GxEPD library, but I have now updated to the GxEPD2 library. The original logo was produced as a mirror image so it would display via GxEPD. This must have been reversed in the new GxEDP2. I recreated the logo data using Image2LCD (see my original blog post here), but did not mirror the image (left to right). I then included that data within my icons page within the code. This all worked!
+
+### Problem: Alignment of Text
+
+There must have been a change in the origin setpoint in GxEPD2 as all my text was mis-aligned. I think the change was that rather than using the top left of the text as the origin, the code now uses the bottom left of the text as the origin. So I needed to push down all the text by 10 pixels.
