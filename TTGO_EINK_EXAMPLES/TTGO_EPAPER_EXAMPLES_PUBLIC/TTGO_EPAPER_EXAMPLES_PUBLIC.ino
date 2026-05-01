@@ -319,13 +319,14 @@ void setup() {
   for (int y = 0; y < 144; y++) {
     Serial.println((String)freq_data_array[y]);
     // We need to convert the freq data into higher resolution for drawing on the screen
-    freq_drawing_array[y] = (int)((freq_data_array[y] - 50.0) * GRAPH_SCALE);  // 0.1 = 20 pixels
+    freq_drawing_array[y] = (int)((freq_data_array[y] - 50.0) * -1 * GRAPH_SCALE);  // 0.1 * GRAPHSCALE = pixels height
+    // if (y < 72) {
+    //   freq_drawing_array[y] = (int)((50.1 - 50.0) * -1 * GRAPH_SCALE);  // 0.1 * GRAPHSCALE = pixels height
+    // } else {
+    //   freq_drawing_array[y] = (int)((49.9 - 50.0) * -1 * GRAPH_SCALE);  // 0.1 * GRAPHSCALE = pixels height
+    // }
   }
   drawFreqGraph(freq_drawing_array, 0, (displayHeight / 2), most_recent_freq);
-
-
-
-
 
 #endif
 

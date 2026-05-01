@@ -307,11 +307,19 @@ void drawFreqGraph(int _data_points[], int _x, int _y, float _recent_f) {
     writeDashedVLine(0, _x + 125, displayHeight, 5);
     writeDashedVLine(0, _x + 188, displayHeight, 5);
 
-    for (int x = 1; x < 144; x++) {
+    for (int x = 2; x <= 144; x++) {
       float x_change = ((float)displayWidth / 144.0);
       int x_1 = (int)(x_change * ((float)x - 1.0));
       int x_2 = (int)(x_change * ((float)x));
-      display.drawLine(_x + x_1, _y + _data_points[x - 1], _x + x_2, _y + _data_points[x], GxEPD_BLACK);
+      display.drawLine(_x + x_1, _y + _data_points[144 - (x - 1)], _x + x_2, _y + _data_points[144 - x], GxEPD_BLACK);
+      // Serial.print("x =");
+      // Serial.print(x);
+      // Serial.print(" 144-x =");
+      // Serial.print(144 - x);
+      // Serial.print(" y0 =");
+      // Serial.print((String)_data_points[144 - x]);
+      // Serial.print(" y1 =");
+      // Serial.println((String)_data_points[144 - (x - 1)]);
     }
     // Add Frequency now information:
     display.setCursor(_x + 110, _y + 54);
@@ -355,7 +363,7 @@ void drawFreqGraph(int _data_points[], int _x, int _y, float _recent_f) {
     } else if (min_trend > 6 && min_trend < 30) {
       //small INCREASE
       display.fillTriangle(displayWidth / 2 - 20, displayHeight / 2 + 15, displayWidth / 2 + 20, displayHeight / 2 + 15, displayWidth / 2, displayHeight / 2 - 15, GxEPD_BLACK);  // small up
-    } else if (min_trend < 6 && min_trend >-6) {
+    } else if (min_trend < 6 && min_trend > -6) {
       //stable
       display.fillRect(displayWidth / 2 - 20, displayHeight / 2 - 8, 40, 5, GxEPD_BLACK);
       display.fillRect(displayWidth / 2 - 20, displayHeight / 2 + 4, 40, 5, GxEPD_BLACK);
