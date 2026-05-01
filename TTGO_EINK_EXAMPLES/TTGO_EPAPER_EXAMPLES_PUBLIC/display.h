@@ -3,16 +3,26 @@
 #include <stdio.h>
 #include <Arduino.h>
 #include "Config.h"
-#include "weather.h"
 
-// For Eink Paper - Use gxEPD Library
+#ifdef WEATHER_EXAMPLE
+#include "weather.h"
+#endif
+
+// UPDATED 14/4/2026:
+// For Eink Paper - Use GxEPD2 Library
 // include library, include base class, make path known
-#include <GxEPD.h>
-#include <GxIO/GxIO_SPI/GxIO_SPI.h>
-#include <GxIO/GxIO.h>
+
+// base class GxEPD2_GFX can be used to pass references or pointers to the display instance as parameter, uses ~1.2k more code
+// enable or disable GxEPD2_GFX base class
+#define ENABLE_GxEPD2_GFX 0
+
+#include <GxEPD2_BW.h>
+#include <GxEPD2_3C.h>
+#include <GxEPD2_4C.h>
+#include <GxEPD2_7C.h>
 
 #include "board_def.h"
-#include "CE_Icons.h"        // Curious Electric Icons
+#include "CE_Icons.h"  // Curious Electric Icons
 
 #include <Fonts/FreeMono9pt7b.h>
 #include <Fonts/FreeMonoBoldOblique9pt7b.h>
@@ -61,16 +71,30 @@ typedef enum {
   CENTER_ALIGNMENT,
 } Text_alignment;
 
+static bool isInit = false;
+
 
 void displayTest();
 void displayShowCELogo();
 void displayInit();
-void displayUpdate();
-void displayWeatherInfo(Forecast_record_type my_WxConditions[], Forecast_record_type my_WxForecast[]);
-void displayRadiationInfo(int _dataNumber);
 void displayText(const String &str, int16_t y, uint8_t alignment);
-void displayCEIcon(int x, int y, String IconName);
 void displaySSID(String DISPLAY_SSID, String DISPLAY_PASS);
 void displayShutDown();
 void displayUpdatingScreen();
 void displayClear();
+void displayShowError();
+
+#ifdef QUOTATION_EXAMPLE
+void displayQuote(String my_quote, String my_author);
+#endif
+
+#ifdef WEATHER_EXAMPLE
+void displayWeatherIcon(int x, int y, String IconName);
+void displayWeatherInfo(Forecast_record_type my_WxConditions[], Forecast_record_type my_WxForecast[]);
+#endif
+
+#ifdef GRIDFREQ_EXAMPLE
+void drawFreqGraph(int my_data_points[], int my_x, int my_y, float my_recent_f);
+void writeDashedHLine(int16_t my_x0, int16_t my_y0, int16_t my_x1, int16_t my_dash_size);
+void writeDashedVLine(int16_t my_y0, int16_t my_x0, int16_t my_y1, int16_t my_dash_size);
+#endif

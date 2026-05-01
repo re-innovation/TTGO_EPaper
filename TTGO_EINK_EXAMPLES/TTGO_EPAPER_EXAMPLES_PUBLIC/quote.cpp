@@ -1,8 +1,9 @@
-#include "quote.h"
+#include "Config.h"
 
+#ifdef QUOTATION_EXAMPLE
+#include "quote.h"
 #include <stdio.h>
 #include <Arduino.h>
-
 
 String parseQuote(String _payload)
 {
@@ -24,7 +25,6 @@ String parseQuote(String _payload)
   {
     // This case there is no author
     _quote = _payload;
-
   }
   return (_quote);
 }
@@ -54,3 +54,4 @@ String parseAuthor(String _payload)
   }
   return (_author);
 }
+#endif

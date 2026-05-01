@@ -1,8 +1,9 @@
+#include "Config.h"
+
+#ifdef WEATHER_EXAMPLE
 #include <stdio.h>
 #include <Arduino.h>
-
 #include "weather.h"
-#include "config.h"
 
 #include <esp_wifi.h>
 #include <WiFi.h>
@@ -18,6 +19,7 @@ bool obtain_wx_data(WiFiClient& _client, const String& _RequestType, Forecast_re
 {
   const String units = (owm_settings.MY_UNITS == "M" ? "metric" : "imperial");
   _client.stop(); // close connection before sending a new request
+  // Historic API 2.5 from OWM:
   HTTPClient http;
   String uri = "/data/2.5/" + _RequestType + "?q=" + owm_settings.MY_CITY + "," + owm_settings.MY_COUNTRY + "&APPID=" + owm_settings.OWM_KEY + "&mode=json&units=" + units + "&lang=" + owm_settings.MY_LANGUAGE;
   if (_RequestType != "weather")
@@ -25,8 +27,15 @@ bool obtain_wx_data(WiFiClient& _client, const String& _RequestType, Forecast_re
     uri += "&cnt=" + String(MAX_WEATHER_READINGS);
   }
 
+  // // NEW API 3.0 from OWM
+  // HTTPClient http;
+  // String uri = "/data/3.0/onecall?lat=33.44&lon=-94.04&appid=" + owm_settings.OWM_KEY + "&mode=json&units=" + units + "&lang=" + owm_settings.MY_LANGUAGE;
+
+  Serial.println(uri);
+
   http.useHTTP10(true); // switch to HTTP version 1.0 to do http.getStream()
   //http.begin(uri,test_root_ca); //HTTPS example connection
+
   http.begin(_client, owm_settings.OWM_SERVER, 80, uri);
   int httpCode = http.GET();
   if (httpCode == HTTP_CODE_OK) {
@@ -43,6 +52,7 @@ bool obtain_wx_data(WiFiClient& _client, const String& _RequestType, Forecast_re
   {
     //ErrorMessage = "Connection failed, error: " + String(http.errorToString(httpCode).c_str());
     Serial.printf("connection failed, error: %s", http.errorToString(httpCode).c_str());
+    Serial.println();
     _client.stop();
     http.end();
     return false;
@@ -148,3 +158,5 @@ void printStoredData() {
   Serial.print("Timezone : ");
   Serial.println(owm_settings.MY_TIMEZONE);
 }
+
+#endif

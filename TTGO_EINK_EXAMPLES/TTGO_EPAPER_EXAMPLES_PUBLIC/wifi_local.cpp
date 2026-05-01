@@ -1,5 +1,8 @@
 #include "wifi_local.h"
 #include "display.h"
+#include "Config.h"
+
+#ifdef WEATHER_EXAMPLE
 #include "weather.h"
 #include "EEPROM.h"
 
@@ -13,9 +16,12 @@ WiFiManagerParameter custom_owm_hemisphere("WIFI_OWM_HEMI", "Hemisphere", "north
 WiFiManagerParameter custom_owm_units("WIFI_OWM_UNITS", "Units", "M", 2);
 WiFiManagerParameter custom_owm_timezone("WIFI_OWM_TIMEZONE", "Timezone", "GMT0BST,M3.5.0/01,M10.5.0/02", 64);
 
+#endif
+
 
 //########################################################################
 void setup_wifi(bool _reset_settings_flag) {
+
   bool wifi_ok_flag = true;
   int n = 0;  // Counter for attempts for wifi connection
   int t = 0;  // how many times to try start the .begin
@@ -24,13 +30,8 @@ void setup_wifi(bool _reset_settings_flag) {
 
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
 
-  //  // The extra parameters to be configured (can be either global or just in the setup)
-  //  // After connecting, parameter.getValue() will get you the configured value
-  //  // id/name placeholder/prompt default length
-
   //WiFiManager, Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wm;
-
 
   //  // reset settings - wipe stored credentials for testing or for changing
   //  // these are stored by the esp library
@@ -40,6 +41,7 @@ void setup_wifi(bool _reset_settings_flag) {
     wm.resetSettings();
   }
 
+#ifdef WEATHER_EXAMPLE
   // Add parameters to config screen:
   wm.addParameter(&custom_owm_key);
   wm.addParameter(&custom_owm_server);
@@ -50,35 +52,37 @@ void setup_wifi(bool _reset_settings_flag) {
   wm.addParameter(&custom_owm_units);
   wm.addParameter(&custom_owm_timezone);
   wm.setSaveParamsCallback(saveParamsCallback);
+#endif 
 
   // Automatically connect using saved credentials,
   // if connection fails, it starts an access point with the specified name
   // if empty will auto generate SSID, if password is blank it will be anonymous AP (wm.autoConnect())
   // then goes into a blocking loop awaiting configuration and will return success result
 
-  uint32_t timeout_seconds = 120;   // 2 mins before it times out and starts again...
+ 
+  uint32_t timeout_seconds = 120; // 2 mins before it times out and starts again...
+  
   wm.setConfigPortalBlocking(false);
   wm.setConfigPortalTimeout(timeout_seconds);
-
   bool res;
-  res = wm.autoConnect("WeatherMap_AP", "openweather"); // password protected ap
+  res = wm.autoConnect("QuotationMachineAP", "quotation"); // password protected ap
   if (!res)
   {
     // If not connecting to wifi then create an Access Point for wifi data
     // This will last for "timeout_seconds" seconds
     Serial.println("Configportal running");
-    displaySSID("WeatherMap_AP", "openweather");  // Display on EINK
+    displaySSID("QuotationMachineAP", "quotation");  // Display on EINK
   }
 
   uint32_t millis_store = millis();
-
+    
   while (!res) {
     wm.process();
     if (WiFi.status() == WL_CONNECTED)
     {
       break;
     }
-    if (millis() > millis_store + (timeout_seconds * 1000))
+    if(millis() > millis_store + (timeout_seconds*1000))
     {
       // Here the unit has timed out and not connected, so shut down ready for new start
       displayShutDown();  // Display on EINK
@@ -96,6 +100,7 @@ void stopWiFi() {
   WiFi.mode(WIFI_OFF);
 }
 
+#ifdef WEATHER_EXAMPLE
 //#########################################################################################
 void saveParamsCallback () {
   Serial.println("Get Params:");
@@ -179,3 +184,5 @@ void saveParamsCallback () {
   }
   Serial.println(owm_settings.MY_TIMEZONE);
 }
+#endif
+
