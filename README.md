@@ -102,7 +102,15 @@ The final URL used to send via an http GET request is: http://api.forismatic.com
 
 ### Grid Frequency example
 
+This example get data from a UK server which has 15 second UK grid frequency data. Data is obtained via an api and returned in json formatted data. The time is first obtained from an ntp server.
 
+The data is then averaged to give 10 min averages for the previous 24hrs.
+
+The data is then shown on a graph on the e-paper screen, showing the previous 24hr along with lines showing deviation from 50Hz bu 0.1Hz steps (so from 49.8Hz to 50.2Hz). 
+
+The most recent instantatneous value is also given. The time of analysis is given. A grpahic will also be shown to highlight the average of the previous 10 mins. This will either be a large or small up arrow (to signify the grid freq is high and you can increase you load), or a large or small down arrow (to signify the grid frequency is low and its best to reduce your load). Within 0.02Hz around 50Hz then this is assumed stable and an equals sign is shown.
+
+More details about developing this example are given here: TO BE ADDED
 
 ## More information
 
