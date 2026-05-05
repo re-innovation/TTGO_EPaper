@@ -110,7 +110,7 @@ The data is then shown on a graph on the e-paper screen, showing the previous 24
 
 The most recent instantatneous value is also given. The time of analysis is given. A grpahic will also be shown to highlight the average of the previous 10 mins. This will either be a large or small up arrow (to signify the grid freq is high and you can increase you load), or a large or small down arrow (to signify the grid frequency is low and its best to reduce your load). Within 0.02Hz around 50Hz then this is assumed stable and an equals sign is shown.
 
-More details about developing this example are given here: TO BE ADDED
+More details about developing this example are given here: [Curious Electric Company Grid Freq Example Blog Post](https://www.curiouselectric.co.uk/blogs/blog/grid-frequency-monitor-with-e-paper-display)
 
 ## More information
 
