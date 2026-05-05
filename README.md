@@ -47,7 +47,7 @@ For these examples you will need to include the following libraries:
 These can be installed via Arduino IDE Library Manager:
 
 * WiFiManager by tzapu            https://github.com/tzapu/WiFiManager  (version: 2.0.15-rc-1) (via Library Manager)
-* ArduinoJson.h                   https://github.com/bblanchon/ArduinoJson  (version 6.20.1) (via Library Manager)
+* ArduinoJson.h                   https://github.com/bblanchon/ArduinoJson  (version 7+) (via Library Manager)
 * TimeLib.h                       https://github.com/PaulStoffregen/Time (via Library Manager)
 * AdaFruit_GFX.h                  https://github.com/adafruit/Adafruit-GFX-Library (version 1.11.5) (and dependancy Adafruit BusIO (14.1)  (via Library Manager)
 * Adafruit_MQTT by Adafruit       Only needed if you want to get data from Adafruit IO.   (via Library Manager)
