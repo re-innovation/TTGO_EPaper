@@ -358,21 +358,21 @@ void drawFreqGraph(int _data_points[], int _x, int _y, float _recent_f) {
     Serial.println(min_trend);
 
     if (min_trend > 31) {
-      //large INCREASE
-      display.fillTriangle(displayWidth / 2 - 40, displayHeight / 2 + 30, displayWidth / 2 + 40, displayHeight / 2 + 30, displayWidth / 2, displayHeight / 2 - 30, GxEPD_BLACK);  // large up
+      //large REDUCE
+      display.fillTriangle(displayWidth / 2 - 40, displayHeight / 2 - 30, displayWidth / 2 + 40, displayHeight / 2 - 30, displayWidth / 2, displayHeight / 2 + 30, GxEPD_BLACK);  // large down
     } else if (min_trend > 6 && min_trend < 30) {
-      //small INCREASE
-      display.fillTriangle(displayWidth / 2 - 20, displayHeight / 2 + 15, displayWidth / 2 + 20, displayHeight / 2 + 15, displayWidth / 2, displayHeight / 2 - 15, GxEPD_BLACK);  // small up
+      //small REDUCE
+      display.fillTriangle(displayWidth / 2 - 20, displayHeight / 2 - 15, displayWidth / 2 + 20, displayHeight / 2 - 15, displayWidth / 2, displayHeight / 2 + 15, GxEPD_BLACK);  // small down
     } else if (min_trend < 6 && min_trend > -6) {
       //stable
       display.fillRect(displayWidth / 2 - 20, displayHeight / 2 - 8, 40, 5, GxEPD_BLACK);
       display.fillRect(displayWidth / 2 - 20, displayHeight / 2 + 4, 40, 5, GxEPD_BLACK);
     } else if (min_trend < -6 && min_trend > -30) {
-      //small REDUCE
-      display.fillTriangle(displayWidth / 2 - 20, displayHeight / 2 - 15, displayWidth / 2 + 20, displayHeight / 2 - 15, displayWidth / 2, displayHeight / 2 + 15, GxEPD_BLACK);  // small down
+      //small INCREASE
+      display.fillTriangle(displayWidth / 2 - 20, displayHeight / 2 + 15, displayWidth / 2 + 20, displayHeight / 2 + 15, displayWidth / 2, displayHeight / 2 - 15, GxEPD_BLACK);  // small up
     } else if (min_trend < -30) {
-      //large REDUCE
-      display.fillTriangle(displayWidth / 2 - 40, displayHeight / 2 - 30, displayWidth / 2 + 40, displayHeight / 2 - 30, displayWidth / 2, displayHeight / 2 + 30, GxEPD_BLACK);  // large down
+      //large INCREASE
+      display.fillTriangle(displayWidth / 2 - 40, displayHeight / 2 + 30, displayWidth / 2 + 40, displayHeight / 2 + 30, displayWidth / 2, displayHeight / 2 - 30, GxEPD_BLACK);  // large up
     }
     // Be nice to draw white graph through triange? TBD
 
